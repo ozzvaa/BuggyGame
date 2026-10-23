@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.nevz.config.GameConfig;
 
 public class Bat extends Entity {
-
     private final float SPEED = GameConfig.BAT_SPEED;
 
     private final Animation<TextureRegion> animation;
@@ -72,7 +71,6 @@ public class Bat extends Entity {
     }
 
     private void followTarget() {
-
         toTarget.set(target.cpy().sub(getCenter()));
 
         if (toTarget.len2() < 1) {
@@ -89,4 +87,6 @@ public class Bat extends Entity {
 
         velocity.set(direction.cpy().scl(SPEED));
     }
+
+
 }

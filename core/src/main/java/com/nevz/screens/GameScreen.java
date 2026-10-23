@@ -5,9 +5,11 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -16,7 +18,9 @@ import com.nevz.BuggyGame;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
 import com.nevz.entities.Bat;
+import com.nevz.entities.Tree;
 import com.nevz.entities.Witch;
+import com.nevz.utils.Utils;
 
 /**
  * First screen of the application. Displayed after the application is created.
@@ -43,6 +47,8 @@ public class GameScreen extends ScreenAdapter {
     private Integer witchCount = 0;
     private float witchTimer = 0;
 
+    // Trees
+    private IntMap<Tree> chunkTrees = new IntMap<>();
 
     public GameScreen(BuggyGame game) {
         this.game = game;
@@ -101,9 +107,10 @@ public class GameScreen extends ScreenAdapter {
 
     private void gameLoop(float delta) {
         handleWitches(delta);
+        handleTrees();
     }
 
-
+    // Witches
     private void handleWitches(float delta) {
         // Reset far witches to pool
         for (int i = witches.size - 1; i >= 0; i--) {
@@ -137,5 +144,32 @@ public class GameScreen extends ScreenAdapter {
         stage.addActor(witch);
         witches.add(witch);
         witchCount++;
+    }
+
+    // Trees
+    private void handleTrees() {
+        int chunk = Utils.getChunk(bat.getCenterX());
+
+        int chunk_span = GameConfig.CHUNK_SPAN_X;
+
+        for (int i = chunk - chunk_span; i < chunk + chunk_span; i++) {
+            if (!chunkTrees.containsKey(i)) {
+                spawnTree(i);
+            }
+        }
+    }
+
+    private void spawnTree(int chunkId) {
+        int chance = MathUtils.random(0, 2);
+        if (chance == 2) {
+            Tree tree = new Tree(
+                MathUtils.random(chunkId * GameConfig.CHUNK_SIZE, (chunkId + 1) * GameConfig.CHUNK_SIZE),
+                0
+            );
+            chunkTrees.put(chunkId, tree);
+            stage.addActor(tree);
+        } else {
+            chunkTrees.put(chunkId, null);
+        }
     }
 }

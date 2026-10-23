@@ -12,4 +12,8 @@ public class GameConfig {
     public static final float WITCH_SPEED = 30 * UNIT;
     public static final float WITCH_TIMER = 1;
 
+    public static final float REVEAL_HOLD_TIME = 0.35f;
+    public static final float REVEAL_FADE_TIME = 1.0f;
+
+
 }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.nevz.BuggyGame;
 import com.nevz.animation.BatAnimation;
+import com.nevz.animation.WitchAnimation;
 import com.nevz.assets.AssetDescriptors;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
@@ -33,6 +35,7 @@ public class GameScreen extends ScreenAdapter {
     private Viewport viewport;
     private Stage stage;
     private AssetManager assetManager;
+    private Animation<TextureRegion> witchAnimation;
 
     // Bat
     private Bat bat;
@@ -64,11 +67,17 @@ public class GameScreen extends ScreenAdapter {
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
 
+        TextureAtlas atlas =
+            assetManager.get(AssetDescriptors.ATLAS);
+
         Texture batSheet =
             assetManager.get(AssetDescriptors.BAT_SHEET);
 
         Animation<TextureRegion> batAnimation =
             BatAnimation.createBatAnimation(batSheet);
+
+        witchAnimation =
+            WitchAnimation.createWitchAnimation(atlas);
 
         bat = new Bat(batAnimation);
         stage.addActor(bat);
@@ -148,6 +157,7 @@ public class GameScreen extends ScreenAdapter {
         if (witchCount >= 10) return;
 
         Witch witch = witchPool.obtain();
+        witch.setAnimation(witchAnimation);
         witch.spawn(bat.getCenter());
         stage.addActor(witch);
         witches.add(witch);

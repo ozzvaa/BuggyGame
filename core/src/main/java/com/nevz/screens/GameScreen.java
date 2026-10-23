@@ -4,13 +4,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.nevz.BuggyGame;
+import com.nevz.animation.BatAnimation;
+import com.nevz.assets.AssetDescriptors;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
 import com.nevz.entities.Bat;
@@ -23,6 +29,7 @@ public class GameScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private Viewport viewport;
     private Stage stage;
+    private AssetManager assetManager;
 
     private Bat bat;
 
@@ -32,16 +39,33 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+        assetManager = game.getAssetManager();
+
+        if (!assetManager.isLoaded(AssetDescriptors.BAT_SHEET)) {
+            assetManager.load(AssetDescriptors.BAT_SHEET);
+            assetManager.finishLoading();
+        }
+
         camera = new OrthographicCamera();
-        viewport = new FillViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
+
+        viewport = new FillViewport(
+            GameConfig.WORLD_WIDTH,
+            GameConfig.WORLD_HEIGHT,
+            camera
+        );
+
         stage = new Stage(viewport, game.getBatch());
 
-        // Game elements
-        bat = new Bat(game.getGameAtlas().findRegion(RegionNames.BAT));
+        Texture batSheet =
+            assetManager.get(AssetDescriptors.BAT_SHEET);
+
+        Animation<TextureRegion> batAnimation =
+            BatAnimation.createBatAnimation(batSheet);
+
+        bat = new Bat(batAnimation);
         stage.addActor(bat);
 
         setupInputs();
-//        stage.setDebugAll(true);
     }
 
     @Override

@@ -24,6 +24,10 @@ public class BuggyGame extends Game {
         // Assets
         assetManager.load(AssetDescriptors.ATLAS);
 
+
+        assetManager.load(AssetDescriptors.BAT_SHEET);
+        assetManager.finishLoading();
+
         assetManager.finishLoading();
 
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);

@@ -59,11 +59,6 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         assetManager = game.getAssetManager();
 
-        if (!assetManager.isLoaded(AssetDescriptors.BAT_SHEET)) {
-            assetManager.load(AssetDescriptors.BAT_SHEET);
-            assetManager.finishLoading();
-        }
-
         camera = new OrthographicCamera();
 
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);

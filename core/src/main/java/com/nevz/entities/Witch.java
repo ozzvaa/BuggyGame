@@ -1,5 +1,6 @@
 package com.nevz.entities;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
 import com.nevz.config.GameConfig;
 
+import static com.nevz.config.GameConfig.REVEAL_FADE_TIME;
 import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME;
 
 public class Witch extends Entity implements Pool.Poolable {
@@ -33,12 +35,27 @@ public class Witch extends Entity implements Pool.Poolable {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (animation == null) {
+        if (animation == null || sonarAlpha <= 0f) {
             return;
         }
 
         TextureRegion currentFrame =
             animation.getKeyFrame(stateTime);
+
+        // shrani se trenutna barva batcha
+        float oldR = batch.getColor().r;
+        float oldG = batch.getColor().g;
+        float oldB = batch.getColor().b;
+        float oldA = batch.getColor().a;
+
+        Color color = getColor();
+
+        batch.setColor(
+            color.r,
+            color.g,
+            color.b,
+            color.a * parentAlpha * sonarAlpha
+        );
 
         batch.draw(
             currentFrame,
@@ -52,6 +69,9 @@ public class Witch extends Entity implements Pool.Poolable {
             getScaleY(),
             getRotation()
         );
+
+        // povrne se prejšnja barva batcha
+        batch.setColor(oldR, oldG, oldB, oldA);
     }
 
     @Override
@@ -64,6 +84,19 @@ public class Witch extends Entity implements Pool.Poolable {
         } else if (direction.x > 0) {
             setScaleX(1f);
         }
+
+        if (revealHoldTimer > 0f) {
+            revealHoldTimer = Math.max(
+                0f,
+                revealHoldTimer - delta
+            );
+        } else if (sonarAlpha > 0f) {
+            sonarAlpha = Math.max(
+                0f,
+                sonarAlpha - delta / REVEAL_FADE_TIME
+            );
+        }
+
         moveBy(
             direction.x * delta * SPEED,
             direction.y * delta * SPEED
@@ -97,6 +130,10 @@ public class Witch extends Entity implements Pool.Poolable {
     public void reset() {
         stateTime = 0f;
         direction.setZero();
+        sonarAlpha = 0f;
+        revealHoldTimer = 0f;
+        lastLocatePulseId = -1;
+        setVisible(true);
         setPosition(0f, 0f);
         setScaleX(1f);
         setScaleY(1f);

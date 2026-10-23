@@ -88,5 +88,15 @@ public class Bat extends Entity {
         velocity.set(direction.cpy().scl(SPEED));
     }
 
+    public Vector2 getAimDirection(Vector2 out) {
+        out.set(target).sub(getCenter());
 
+        if (out.len2() < 0.0001f) {
+            out.set(1f, 0f);
+        } else {
+            out.nor();
+        }
+
+        return out;
+    }
 }

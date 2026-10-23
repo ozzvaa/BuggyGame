@@ -8,7 +8,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.nevz.BuggyGame;
+import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
+import com.nevz.entities.Bat;
 
 /**
  * First screen of the application. Displayed after the application is created.
@@ -19,6 +21,8 @@ public class GameScreen extends ScreenAdapter {
     private Viewport viewport;
     private Stage stage;
 
+    private Bat bat;
+
     public GameScreen(BuggyGame game) {
         this.game = game;
     }
@@ -28,6 +32,10 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         viewport = new FillViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
+
+        // Game elements
+        bat = new Bat(game.getGameAtlas().findRegion(RegionNames.BAT));
+        stage.addActor(bat);
 
         Gdx.input.setInputProcessor(stage);
     }

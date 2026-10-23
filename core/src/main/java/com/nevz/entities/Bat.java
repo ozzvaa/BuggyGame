@@ -22,7 +22,6 @@ public class Bat extends Entity {
             GameConfig.BAT_SIZE
         );
         this.textureRegion = textureRegion;
-        setOriginCenter();
         target.set(getCenter());
     }
 

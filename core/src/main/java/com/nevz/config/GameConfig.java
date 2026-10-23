@@ -8,16 +8,24 @@ public class GameConfig {
     public static final float CHUNK_SIZE = 40;
     public static final int CHUNK_SPAN_X =
         (int) Math.ceil(WORLD_WIDTH / CHUNK_SIZE);
-
     public static final int CHUNK_SPAN_Y =
         (int) Math.ceil(WORLD_HEIGHT / CHUNK_SIZE);
 
-    public static final float BAT_SIZE = 3 * UNIT;
-    public static final float BAT_SPEED = 15 * UNIT;
+    public static final float BAT_SIZE = 5 * UNIT;
+    public static final float BAT_SPEED = 5 * UNIT;
 
-    public static final float WITCH_SIZE = 5 * UNIT;
-    public static final float WITCH_SPEED = 30 * UNIT;
-    public static final float WITCH_TIMER = 1;
+    public static final float WITCH_SIZE = 4 * UNIT;
+    public static final float WITCH_SPEED = 5 * UNIT;
+    public static final float WITCH_TIMER = 2;
+
+    public static final float REVEAL_HOLD_TIME = 0.35f;
+    public static final float REVEAL_FADE_TIME = 1.0f;
+
+    public static final float LOCATE_COOLDOWN = 2f;
+    public static final float LOCATE_DURATION = 0.7f;
+    public static final float LOCATE_MAX_RANGE =
+        GameConfig.WORLD_WIDTH * 0.8f;
+    public static final float LOCATE_HALF_ANGLE = 20f;
 
     public static final float TREE_WIDTH = 5 * UNIT;
     public static final float TREE_HEIGHT = 15 * UNIT;

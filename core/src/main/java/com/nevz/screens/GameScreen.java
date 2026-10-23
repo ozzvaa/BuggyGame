@@ -1,8 +1,11 @@
 package com.nevz.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FillViewport;
@@ -37,12 +40,13 @@ public class GameScreen extends ScreenAdapter {
         bat = new Bat(game.getGameAtlas().findRegion(RegionNames.BAT));
         stage.addActor(bat);
 
-        Gdx.input.setInputProcessor(stage);
+        setupInputs();
+//        stage.setDebugAll(true);
     }
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0.17f,0.16f,0.02f,0);
+        ScreenUtils.clear(0.17f, 0.16f, 0.02f, 0);
 
         stage.act();
         stage.draw();
@@ -56,5 +60,23 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         stage.dispose();
+    }
+
+    private void setupInputs() {
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean mouseMoved(int screenX, int screenY) {
+                Vector2 pos = stage.screenToStageCoordinates(
+                    new Vector2(screenX, screenY)
+                );
+
+                bat.setTarget(pos);
+                return false;
+            }
+        });
+
+        Gdx.input.setInputProcessor(multiplexer);
     }
 }

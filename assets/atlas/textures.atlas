@@ -256,6 +256,13 @@ bat
   orig: 64, 64
   offset: 0, 0
   index: -1
+fireball
+  rotate: false
+  xy: 3572, 45
+  size: 30, 15
+  orig: 30, 15
+  offset: 0, 0
+  index: -1
 pumpkin
   rotate: false
   xy: 2, 2
@@ -265,28 +272,28 @@ pumpkin
   index: 2
 pumpkin
   rotate: false
-  xy: 3572, 40
+  xy: 3902, 106
   size: 19, 20
   orig: 19, 20
   offset: 0, 0
   index: 3
 pumpkin
   rotate: false
-  xy: 3902, 107
+  xy: 26, 5
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 4
 pumpkin
   rotate: false
-  xy: 26, 5
+  xy: 3923, 107
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 5
 pumpkin
   rotate: false
-  xy: 3593, 41
+  xy: 3902, 85
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
@@ -297,25 +304,25 @@ witch
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
-  index: 1
+  index: 0
 witch
   rotate: false
   xy: 3704, 62
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
-  index: 2
+  index: 1
 witch
   rotate: false
   xy: 3770, 62
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
-  index: 3
+  index: 2
 witch
   rotate: false
   xy: 3836, 62
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
-  index: 4
+  index: 3

@@ -12,11 +12,11 @@ public class GameConfig {
         (int) Math.ceil(WORLD_HEIGHT / CHUNK_SIZE);
 
     public static final float BAT_SIZE = 5 * UNIT;
-    public static final float BAT_SPEED = 5 * UNIT;
+    public static final float BAT_SPEED = 4 * UNIT;
 
     public static final float WITCH_SIZE = 4 * UNIT;
-    public static final float WITCH_SPEED = 5 * UNIT;
-    public static final float WITCH_TIMER = 2;
+    public static final float WITCH_SPEED = 3 * UNIT;
+    public static final float WITCH_TIMER = 3;
 
     public static final float REVEAL_HOLD_TIME = 0.35f;
     public static final float REVEAL_FADE_TIME = 1.0f;
@@ -27,8 +27,16 @@ public class GameConfig {
         GameConfig.WORLD_WIDTH * 0.8f;
     public static final float LOCATE_HALF_ANGLE = 20f;
 
-    public static final float TREE_WIDTH = 5 * UNIT;
+    public static final float TREE_WIDTH = 15 * UNIT;
     public static final float TREE_HEIGHT = 15 * UNIT;
 
+    public static final float ATTACK_COOLDOWN = 5f;
 
+    public static final float FIREBALL_SPEED = 150f;
+    public static final float FIREBALL_SIZE = 3 * UNIT;
+    public static final float FIREBALL_LIFETIME = 3f;
+
+    public static final float PUMPKIN_WIDTH = 2 * UNIT;
+    public static final float PUMPKIN_HEIGHT = 2 * UNIT;
+    public static final float PUMPKIN_GRAVITY = 100f;
 }

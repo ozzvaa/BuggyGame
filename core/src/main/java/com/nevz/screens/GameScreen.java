@@ -24,10 +24,9 @@ import com.nevz.BuggyGame;
 import com.nevz.animation.BatAnimation;
 import com.nevz.animation.WitchAnimation;
 import com.nevz.assets.AssetDescriptors;
+import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
-import com.nevz.entities.Bat;
-import com.nevz.entities.Tree;
-import com.nevz.entities.Witch;
+import com.nevz.entities.*;
 import com.nevz.utils.Utils;
 
 import static com.nevz.config.GameConfig.*;
@@ -38,17 +37,22 @@ import static com.nevz.config.GameConfig.*;
 public class GameScreen extends ScreenAdapter {
 
     private final BuggyGame game;
-    private OrthographicCamera camera;
     private Viewport viewport;
     private Stage stage;
-    private AssetManager assetManager;
     private Animation<TextureRegion> witchAnimation;
+    private final Array<TextureRegion> treeRegions = new Array<>();
+    private final Array<TextureRegion> pumpkinRegions = new Array<>();
+    private TextureRegion fireballRegion;
+
+    private final Array<Fireball> fireballs = new Array<>();
+    private final Array<Pumpkin> pumpkins = new Array<>();
 
     private boolean locateActive = false;
     private float locateElapsed = 0f;
     private float locateCooldownTimer = 0f;
     private float locateCurrentRange = 0f;
     private int locatePulseId = 0;
+    private float attackCooldownTimer = 0f;
 
     private final Vector2 locateOrigin = new Vector2();
     private final Vector2 locateDirection = new Vector2(1f, 0f);
@@ -58,20 +62,20 @@ public class GameScreen extends ScreenAdapter {
     private Bat bat;
 
     // Witches
-    private Pool<Witch> witchPool = new Pool<Witch>() {
+    private final Pool<Witch> witchPool = new Pool<Witch>() {
         @Override
         protected Witch newObject() {
             return new Witch();
         }
     };
 
-    private Array<Witch> witches = new Array<>();
+    private final Array<Witch> witches = new Array<>();
 
     private Integer witchCount = 0;
     private float witchTimer = 0;
 
     // Trees
-    private IntMap<Tree> chunkTrees = new IntMap<>();
+    private final IntMap<Tree> chunkTrees = new IntMap<>();
 
     public GameScreen(BuggyGame game) {
         this.game = game;
@@ -79,14 +83,20 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        assetManager = game.getAssetManager();
+        AssetManager assetManager = game.getAssetManager();
 
-        camera = new OrthographicCamera();
+        OrthographicCamera camera = new OrthographicCamera();
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
 
         TextureAtlas atlas =
             assetManager.get(AssetDescriptors.ATLAS);
+
+        treeRegions.clear();
+        treeRegions.addAll(atlas.findRegions(RegionNames.TREE));
+
+        fireballRegion = atlas.findRegion(RegionNames.FIREBALL);
+        pumpkinRegions.addAll(atlas.findRegions(RegionNames.PUMPKIN));
 
         Texture batSheet =
             assetManager.get(AssetDescriptors.BAT_SHEET);
@@ -110,6 +120,7 @@ public class GameScreen extends ScreenAdapter {
 
         gameLoop(delta);
         stage.act(delta);
+        handleFireballCollisions();
         stage.draw();
     }
 
@@ -144,6 +155,11 @@ public class GameScreen extends ScreenAdapter {
                     return true;
                 }
 
+                if (keycode == Input.Keys.A) {
+                    tryAttack();
+                    return true;
+                }
+
                 return false;
             }
         });
@@ -152,6 +168,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void gameLoop(float delta) {
+        updateAttackCooldown(delta);
         updateLocate(delta);
         handleWitches(delta);
         handleTrees();
@@ -170,7 +187,6 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-        // Spawn new witch every 10 seconds
         witchTimer += delta;
 
         if (witchTimer < GameConfig.WITCH_TIMER) {
@@ -209,11 +225,16 @@ public class GameScreen extends ScreenAdapter {
 
     private void spawnTree(int chunkId) {
         int chance = MathUtils.random(0, 2);
+
         if (chance == 2) {
-            Tree tree = new Tree(
-                MathUtils.random(chunkId * GameConfig.CHUNK_SIZE, (chunkId + 1) * GameConfig.CHUNK_SIZE),
-                0
+            float x = MathUtils.random(
+                chunkId * GameConfig.CHUNK_SIZE,
+                (chunkId + 1) * GameConfig.CHUNK_SIZE
             );
+
+            TextureRegion randomTree = treeRegions.random();
+            Tree tree = new Tree(x, 0f, randomTree);
+
             chunkTrees.put(chunkId, tree);
             stage.addActor(tree);
         } else {
@@ -260,6 +281,8 @@ public class GameScreen extends ScreenAdapter {
         locateCurrentRange = LOCATE_MAX_RANGE * progress;
 
         revealWitchesReachedByPulse();
+        revealTreesReachedByPulse();
+        revealPumpkinsReachedByPulse();
 
         if (progress >= 1f) {
             locateActive = false;
@@ -281,12 +304,12 @@ public class GameScreen extends ScreenAdapter {
 
             float distanceSquared = candidateOffset.len2();
 
-            // Val čarovnice še ni dosegel.
+            // Val čarovnice še ni dosegel
             if (distanceSquared > rangeSquared) {
                 continue;
             }
 
-            // Če čarovnica ni tik ob izvoru, preveri kot.
+            // Če čarovnica ni tik ob izvoru, preveri kot
             if (distanceSquared > 0.0001f) {
                 candidateOffset.nor();
 
@@ -295,8 +318,162 @@ public class GameScreen extends ScreenAdapter {
                 }
             }
 
-            // Val jo je dosegel.
+            // Val jo je dosegel
             witch.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void revealTreesReachedByPulse() {
+        float rangeSquared =
+            locateCurrentRange * locateCurrentRange;
+
+        float minDot =
+            MathUtils.cosDeg(LOCATE_HALF_ANGLE);
+
+        for (IntMap.Entry<Tree> entry : chunkTrees.entries()) {
+            Tree tree = entry.value;
+
+            // V tem chunku morda ni drevesa
+            if (tree == null) {
+                continue;
+            }
+
+            candidateOffset.set(
+                tree.getCenterX() - locateOrigin.x,
+                tree.getCenterY() - locateOrigin.y
+            );
+
+            float distanceSquared = candidateOffset.len2();
+
+            // Sonar drevesa še ni dosegel
+            if (distanceSquared > rangeSquared) {
+                continue;
+            }
+
+            // Ali je drevo v kotu
+            if (distanceSquared > 0.0001f) {
+                candidateOffset.nor();
+
+                if (candidateOffset.dot(locateDirection) < minDot) {
+                    continue;
+                }
+            }
+
+            // Sonar dosegel drevo
+            tree.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void tryAttack() {
+        if (attackCooldownTimer > 0f) {
+            return;
+        }
+
+        Vector2 direction = bat.getAimDirection(new Vector2());
+        Vector2 center = bat.getCenter();
+
+        Fireball fireball = new Fireball(
+            center.x,
+            center.y,
+            direction,
+            fireballRegion
+        );
+
+        fireballs.add(fireball);
+        stage.addActor(fireball);
+
+        attackCooldownTimer = GameConfig.ATTACK_COOLDOWN;
+    }
+
+    private void updateAttackCooldown(float delta) {
+        attackCooldownTimer = Math.max(
+            0f,
+            attackCooldownTimer - delta
+        );
+    }
+
+    private void handleFireballCollisions() {
+        for (int i = fireballs.size - 1; i >= 0; i--) {
+            Fireball fireball = fireballs.get(i);
+
+            if (fireball.isExpired()) {
+                fireball.remove();
+                fireballs.removeIndex(i);
+                continue;
+            }
+
+            boolean hit = false;
+
+            for (int j = witches.size - 1; j >= 0; j--) {
+                Witch witch = witches.get(j);
+
+                if (!fireball.getRect().overlaps(witch.getRect())) {
+                    continue;
+                }
+
+                // shrani položaj pred vračanjem čarovnice v Pool
+                float pumpkinX =
+                    witch.getCenterX() - GameConfig.PUMPKIN_WIDTH / 2f;
+
+                float pumpkinY = witch.getY();
+
+                TextureRegion randomPumpkin = pumpkinRegions.random();
+
+                Pumpkin pumpkin = new Pumpkin(
+                    pumpkinX,
+                    pumpkinY,
+                    randomPumpkin
+                );
+
+                pumpkins.add(pumpkin);
+                stage.addActor(pumpkin);
+
+                witch.remove();
+                witches.removeIndex(j);
+                witchPool.free(witch);
+                witchCount = Math.max(0, witchCount - 1);
+
+                fireball.remove();
+                fireballs.removeIndex(i);
+
+                hit = true;
+                break;
+            }
+
+            if (hit) {
+                continue;
+            }
+        }
+    }
+
+    private void revealPumpkinsReachedByPulse() {
+        float rangeSquared =
+            locateCurrentRange * locateCurrentRange;
+
+        float minDot =
+            MathUtils.cosDeg(LOCATE_HALF_ANGLE);
+
+        for (Pumpkin pumpkin : pumpkins) {
+            candidateOffset.set(
+                pumpkin.getCenterX() - locateOrigin.x,
+                pumpkin.getCenterY() - locateOrigin.y
+            );
+
+            float distanceSquared = candidateOffset.len2();
+
+            if (distanceSquared > rangeSquared) {
+                continue;
+            }
+
+            if (distanceSquared > 0.0001f) {
+                candidateOffset.nor();
+
+                if (candidateOffset.dot(locateDirection) < minDot) {
+                    continue;
+                }
+            }
+
+            pumpkin.revealFromLocate(locatePulseId);
         }
     }
 

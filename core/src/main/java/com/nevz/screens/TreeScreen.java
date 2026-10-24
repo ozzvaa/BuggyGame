@@ -11,6 +11,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +25,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.nevz.BuggyGame;
@@ -33,6 +36,8 @@ import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
 import com.nevz.entities.Bat;
 import com.nevz.entities.Tree;
+import com.nevz.utils.TreeData;
+import com.nevz.utils.TreesData;
 
 public class TreeScreen extends ScreenAdapter {
     private final BuggyGame game;
@@ -140,7 +145,7 @@ public class TreeScreen extends ScreenAdapter {
                 public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                     if (button == Input.Buttons.MIDDLE) {
                         if (moveBat) {
-                            Vector2 pos = stage.screenToStageCoordinates(new Vector2(screenX,screenY));
+                            Vector2 pos = stage.screenToStageCoordinates(new Vector2(screenX, screenY));
                             bat.setCenter(pos);
                             bat.setTarget(pos);
                             bat.perchAtPoint(null);
@@ -195,6 +200,14 @@ public class TreeScreen extends ScreenAdapter {
                     if (keycode == Input.Keys.SHIFT_LEFT) {
                         moveBat = true;
                         return true;
+                    } else if (keycode == Input.Keys.ENTER) {
+                        saveTreeData();
+                        return true;
+                    } else if (keycode == Input.Keys.L) {
+                        loadTreeData();
+                        return true;
+                    } else if (keycode == Input.Keys.H) {
+                        stage.setDebugAll(!stage.isDebugAll());
                     }
                     return false;
                 }
@@ -266,4 +279,40 @@ public class TreeScreen extends ScreenAdapter {
             tree.debugSetVisible();
         }
     }
+
+    private void saveTreeData() {
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.json);
+
+        TreesData data = new TreesData();
+
+        for (int i = 0; i < trees.size; i++) {
+            Tree tree = trees.get(i);
+            data.trees.add(new TreeData(i, tree.getPerchPoints()));
+        }
+
+        FileHandle file = Gdx.files.local("trees.json");
+        json.toJson(data, file);
+
+        Gdx.app.log("TreeScreen", "Trees saved to " + file.path());
+    }
+
+    private void loadTreeData() {
+        FileHandle file = Gdx.files.local("trees.json");
+
+        if (!file.exists()) return;
+
+        Json json = new Json();
+        TreesData data = json.fromJson(TreesData.class, file);
+
+        for (TreeData treeData : data.trees) {
+            if (treeData.index < 0 || treeData.index >= trees.size) continue;
+
+            Tree tree = trees.get(treeData.index);
+            tree.setPerchPoints(treeData.perchPoints);
+        }
+
+        Gdx.app.log("TreeScreen", "Trees loaded from " + file.path());
+    }
+
 }

@@ -1,6 +1,5 @@
 package com.nevz.entities;
 
-import static com.nevz.config.GameConfig.BAT_SIZE;
 import static com.nevz.config.GameConfig.PERCH_RADIUS;
 import static com.nevz.config.GameConfig.REVEAL_FADE_TIME;
 import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME;
@@ -25,8 +24,6 @@ public class Tree extends Entity {
     private float revealHoldTimer = 0f;
     private int lastLocatePulseId = -1;
 
-    // TODO set debug to false
-    private boolean debug = false;
     private Array<Vector2> perchPoints = new Array<>();
 
     public Tree(float x, float y, TextureRegion textureRegion) {
@@ -139,6 +136,17 @@ public class Tree extends Entity {
         if (closestPoint == null || closestDist > PERCH_RADIUS) return null;
         System.out.println("Closest Point: " + closestPoint.x + ", " + closestPoint.y + " Dst: " + closestDist);
         return closestPoint;
+    }
+
+    public Array<Vector2> getPerchPoints() {
+        return perchPoints;
+    }
+
+    public void setPerchPoints(Array<Vector2> points) {
+        perchPoints.clear();
+        for (Vector2 point : points) {
+            perchPoints.add(point.cpy());
+        }
     }
 
     public int getChunkId() {

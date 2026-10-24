@@ -154,7 +154,8 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        camera.update();
+        camera.position.set(bat.getCenter(), 0);
+//        camera.update();
     }
 
     @Override
@@ -221,7 +222,6 @@ public class GameScreen extends ScreenAdapter {
 
     private void handleCamera(float delta) {
         Vector3 pos = new Vector3(bat.getCenter(), 0);
-        System.out.println(pos.y);
         pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
         camera.position.lerp(
             pos,
@@ -236,6 +236,8 @@ public class GameScreen extends ScreenAdapter {
         handleWitches(delta);
         handleTrees();
         handleFireballCollisions();
+        revealNearby();
+
     }
 
     // Witches
@@ -264,11 +266,12 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void spawnWithces() {
-        if (witchCount >= 10) return;
+//        if (witchCount >= 10) return;
 
         Witch witch = witchPool.obtain();
         witch.setAnimation(witchAnimation);
         witch.spawn(bat.getCenter());
+        System.out.println("Spawned witch at: "+witch.getCenter());
         stage.addActor(witch);
         witches.add(witch);
         witchCount++;
@@ -401,6 +404,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+
     private void revealWitchesReachedByPulse() {
         float rangeSquared =
             locateCurrentRange * locateCurrentRange;
@@ -473,6 +477,40 @@ public class GameScreen extends ScreenAdapter {
 
             // Sonar dosegel drevo
             tree.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void revealNearby() {
+        // Trees
+        int chunkId = Utils.getChunk(bat.getCenter().x);
+        for (int i = chunkId -1; i < chunkId + 2; i++) {
+            Tree nearTree = chunkTrees.get(i);
+            if (nearTree != null) {
+
+                float minDistance = nearTree.getWidth();
+
+                float visibilityPercent = Utils.calculateNearbyVisibility(
+                    bat.getCenter(),
+                    nearTree.getCenter(),
+                    minDistance / 2f
+                );
+
+                nearTree.setNearbyAlpha(visibilityPercent);
+            }
+        }
+
+        for (Witch witch: witches) {
+            if (witch.getNearbyAlpha() <= 0 && (witch.getCenter().dst2(bat.getCenter()) > witch.getHeight()*witch.getHeight()*5)) continue; // Optimisation to not check every witch every time
+
+            float minDistance = witch.getWidth()*3;
+            float visibilityPercent = Utils.calculateNearbyVisibility(
+                bat.getCenter(),
+                witch.getCenter(),
+                minDistance / 2f
+            );
+
+            witch.setNearbyAlpha(visibilityPercent);
+
         }
     }
 

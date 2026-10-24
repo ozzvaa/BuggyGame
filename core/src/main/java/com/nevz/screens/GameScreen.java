@@ -109,11 +109,11 @@ public class GameScreen extends ScreenAdapter {
         witchAnimation =
             WitchAnimation.createWitchAnimation(atlas);
 
-        bat = new Bat(batAnimation);
+        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
         stage.addActor(bat);
 
         setupInputs();
-        stage.setDebugAll(true);
+//        stage.setDebugAll(true);
     }
 
     @Override

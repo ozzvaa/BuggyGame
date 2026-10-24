@@ -6,19 +6,25 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.nevz.config.GameConfig;
 
+import org.w3c.dom.Text;
+
 public class Bat extends Entity {
     private final float SPEED = GameConfig.BAT_SPEED;
 
     private final Animation<TextureRegion> animation;
+    private final TextureRegion perchTexture;
+    private boolean perching = false;
 
     private float stateTime = 0f;
 
     private final Vector2 velocity = new Vector2(0, 0);
+
+    private final Vector2 perchTarget = new Vector2();
     private final Vector2 target = new Vector2();
     private final Vector2 toTarget = new Vector2(0, 0);
     private final Vector2 direction = new Vector2(1, 0);
 
-    public Bat(Animation<TextureRegion> animation) {
+    public Bat(Animation<TextureRegion> animation, TextureRegion perchTexture) {
         super(
             GameConfig.WORLD_WIDTH / 2f,
             GameConfig.WORLD_HEIGHT / 2f,
@@ -27,6 +33,7 @@ public class Bat extends Entity {
         );
 
         this.animation = animation;
+        this.perchTexture = perchTexture;
 
         setOriginCenter();
         target.set(getCenter());
@@ -37,6 +44,10 @@ public class Bat extends Entity {
 
         TextureRegion currentFrame =
             animation.getKeyFrame(stateTime);
+
+        if (perching && velocity.isZero()) {
+            currentFrame = perchTexture;
+        }
 
         batch.draw(
             currentFrame,
@@ -58,11 +69,16 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
-        followTarget();
+        if (perching ) {
+            followPerch();
+        }
+        else {
+            followTarget();
+        }
 
         moveBy(
-            velocity.x * delta,
-            velocity.y * delta
+            velocity.x * delta * SPEED,
+            velocity.y * delta * SPEED
         );
     }
 
@@ -73,8 +89,27 @@ public class Bat extends Entity {
     private void followTarget() {
         toTarget.set(target.cpy().sub(getCenter()));
 
-        if (toTarget.len2() < 1) {
+        if (toTarget.len() < 0.1) {
             direction.set(0, 0);
+        } else {
+            direction.set(toTarget.cpy().nor());
+        }
+
+        if (direction.x < 0) {
+            setScaleX(-1f);  // vodoravno zrcaljenje
+        } else if (direction.x > 0) {
+            setScaleX(1f);
+        }
+
+        velocity.set(direction.cpy().scl(SPEED));
+    }
+
+    private void followPerch() {
+        toTarget.set(perchTarget.cpy().sub(getCenter()));
+
+        if (toTarget.len() < 0.1) {
+            direction.set(0, 0);
+            System.out.println("Perch found!");
         } else {
             direction.set(toTarget.cpy().nor());
         }
@@ -98,5 +133,15 @@ public class Bat extends Entity {
         }
 
         return out;
+    }
+
+    public void perchAtPoint(Vector2 perch) {
+        if (perch != null) {
+            perchTarget.set(perch);
+            perching = true;
+        }
+        else {
+            perching = false;
+        }
     }
 }

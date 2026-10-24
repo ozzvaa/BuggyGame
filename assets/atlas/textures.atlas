@@ -216,35 +216,35 @@ Tree
   index: 21
 Tree
   rotate: false
-  xy: 2432, 58
+  xy: 2498, 58
   size: 57, 60
   orig: 57, 60
   offset: 0, 0
   index: 15
 Tree
   rotate: false
-  xy: 2491, 57
+  xy: 2557, 57
   size: 44, 61
   orig: 44, 61
   offset: 0, 0
   index: 1
 Tree
   rotate: false
-  xy: 2537, 57
+  xy: 2603, 57
   size: 44, 61
   orig: 44, 61
   offset: 0, 0
   index: 2
 Tree
   rotate: false
-  xy: 2583, 50
+  xy: 2649, 50
   size: 40, 68
   orig: 40, 68
   offset: 0, 0
   index: 3
 Tree
   rotate: false
-  xy: 2625, 47
+  xy: 2691, 47
   size: 39, 71
   orig: 39, 71
   offset: 0, 0
@@ -252,6 +252,13 @@ Tree
 bat
   rotate: false
   xy: 2102, 54
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+bat_perch
+  rotate: false
+  xy: 2168, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
@@ -265,63 +272,63 @@ fireball
   index: -1
 pumpkin
   rotate: false
-  xy: 2666, 96
+  xy: 2732, 96
   size: 22, 22
   orig: 22, 22
   offset: 0, 0
   index: 2
 pumpkin
   rotate: false
-  xy: 2666, 74
+  xy: 2732, 74
   size: 19, 20
   orig: 19, 20
   offset: 0, 0
   index: 3
 pumpkin
   rotate: false
-  xy: 2690, 99
+  xy: 2756, 99
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 4
 pumpkin
   rotate: false
-  xy: 2712, 99
+  xy: 2778, 99
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 5
 pumpkin
   rotate: false
-  xy: 2666, 53
+  xy: 2732, 53
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 2168, 54
+  xy: 2234, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 0
 witch
   rotate: false
-  xy: 2234, 54
+  xy: 2300, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 2300, 54
+  xy: 2366, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 2
 witch
   rotate: false
-  xy: 2366, 54
+  xy: 2432, 54
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

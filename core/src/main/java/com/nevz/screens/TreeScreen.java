@@ -11,6 +11,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -79,7 +80,7 @@ public class TreeScreen extends ScreenAdapter {
         Animation<TextureRegion> batAnimation =
             BatAnimation.createBatAnimation(batSheet);
 
-        bat = new Bat(batAnimation);
+        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
         stage.addActor(bat);
 
         stage.setDebugAll(true);
@@ -111,11 +112,20 @@ public class TreeScreen extends ScreenAdapter {
     }
 
     private void drawDebug() {
+
+
         ShapeRenderer sr = game.getShapeRenderer();
         sr.setProjectionMatrix(camera.combined);
+
+        sr.setColor(Color.GREEN);
         sr.begin(ShapeRenderer.ShapeType.Line);
         sr.line(0, 0, WORLD_WIDTH, 0);
         sr.line(0, 0, 0, WORLD_HEIGHT);
+
+        sr.setColor(Color.RED);
+        Vector2 mouse = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        mouse = stage.screenToStageCoordinates(mouse);
+        sr.circle(mouse.x, mouse.y, GameConfig.PERCH_RADIUS, 20);
 
         sr.end();
     }
@@ -133,6 +143,7 @@ public class TreeScreen extends ScreenAdapter {
                             Vector2 pos = stage.screenToStageCoordinates(new Vector2(screenX,screenY));
                             bat.setCenter(pos);
                             bat.setTarget(pos);
+                            bat.perchAtPoint(null);
                             return true;
                         }
                         dragging = true;
@@ -228,7 +239,8 @@ public class TreeScreen extends ScreenAdapter {
                             if (point != null) {
                                 Vector2 perchWorld = tree.localToStageCoordinates(point.cpy());
 //                                bat.setCenter(perchWorld);
-                                bat.setTarget(perchWorld);
+//                                bat.setTarget(perchWorld);
+                                bat.perchAtPoint(perchWorld);
                             }
                             return false;
                         } else {

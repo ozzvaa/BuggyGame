@@ -27,6 +27,7 @@ import com.nevz.animation.WitchAnimation;
 import com.nevz.assets.AssetDescriptors;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
+import com.nevz.effects.SonarEffect;
 import com.nevz.entities.*;
 import com.nevz.utils.Utils;
 
@@ -73,6 +74,8 @@ public class GameScreen extends ScreenAdapter {
 
     private final Array<Witch> witches = new Array<>();
 
+    private SonarEffect sonarEffect;
+
     private Integer witchCount = 0;
     private float witchTimer = 0;
 
@@ -109,6 +112,8 @@ public class GameScreen extends ScreenAdapter {
         witchAnimation =
             WitchAnimation.createWitchAnimation(atlas);
 
+        sonarEffect = new SonarEffect();
+
         bat = new Bat(batAnimation);
         stage.addActor(bat);
 
@@ -118,7 +123,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0f, 0f, 0f, 0);
+        ScreenUtils.clear(0f, 0f, 0f, 1f);
 
         handleCamera(delta);
         gameLoop(delta);
@@ -126,6 +131,8 @@ public class GameScreen extends ScreenAdapter {
         stage.act(delta);
         stage.draw();
 //        drawDebug();
+
+        sonarEffect.draw(camera.combined);
     }
 
 
@@ -138,6 +145,9 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         stage.dispose();
+        if (sonarEffect != null) {
+            sonarEffect.dispose();
+        }
     }
 
     private void setupInputs() {
@@ -283,11 +293,20 @@ public class GameScreen extends ScreenAdapter {
 
         locateOrigin.set(bat.getCenterX(), bat.getCenterY());
         bat.getAimDirection(locateDirection);
+        sonarEffect.start(
+            locateOrigin,
+            locateDirection,
+            LOCATE_MAX_RANGE,
+            LOCATE_DURATION,
+            LOCATE_HALF_ANGLE
+        );
 
         locatePulseId++; // vsak strel svoj ID
     }
 
     private void updateLocate(float delta) {
+        sonarEffect.update(delta);
+
         if (locateCooldownTimer > 0f) {
             locateCooldownTimer = Math.max(
                 0f,

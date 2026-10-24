@@ -1,5 +1,14 @@
 package com.nevz.screens;
 
+import static com.nevz.config.GameConfig.CHUNK_SIZE;
+import static com.nevz.config.GameConfig.LOCATE_COOLDOWN;
+import static com.nevz.config.GameConfig.LOCATE_DURATION;
+import static com.nevz.config.GameConfig.LOCATE_HALF_ANGLE;
+import static com.nevz.config.GameConfig.LOCATE_MAX_RANGE;
+import static com.nevz.config.GameConfig.TREE_WIDTH;
+import static com.nevz.config.GameConfig.WORLD_HEIGHT;
+import static com.nevz.config.GameConfig.WORLD_WIDTH;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -31,11 +40,14 @@ import com.nevz.animation.WitchAnimation;
 import com.nevz.assets.AssetDescriptors;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
-import com.nevz.entities.*;
+import com.nevz.effects.SonarEffect;
+import com.nevz.entities.Bat;
+import com.nevz.entities.Fireball;
+import com.nevz.entities.Pumpkin;
+import com.nevz.entities.Tree;
+import com.nevz.entities.Witch;
 import com.nevz.utils.TreesData;
 import com.nevz.utils.Utils;
-
-import static com.nevz.config.GameConfig.*;
 
 /**
  * First screen of the application. Displayed after the application is created.
@@ -43,32 +55,13 @@ import static com.nevz.config.GameConfig.*;
 public class GameScreen extends ScreenAdapter {
 
     private final BuggyGame game;
-    private FitViewport viewport;
-    private OrthographicCamera camera;
-    private Stage stage;
-    private Animation<TextureRegion> witchAnimation;
     private final Array<TextureRegion> treeRegions = new Array<>();
-    private TreesData treesData;
     private final Array<TextureRegion> pumpkinRegions = new Array<>();
-    private TextureRegion fireballRegion;
-
     private final Array<Fireball> fireballs = new Array<>();
     private final Array<Pumpkin> pumpkins = new Array<>();
-
-    private boolean locateActive = false;
-    private float locateElapsed = 0f;
-    private float locateCooldownTimer = 0f;
-    private float locateCurrentRange = 0f;
-    private int locatePulseId = 0;
-    private float attackCooldownTimer = 0f;
-
     private final Vector2 locateOrigin = new Vector2();
     private final Vector2 locateDirection = new Vector2(1f, 0f);
     private final Vector2 candidateOffset = new Vector2();
-
-    // Bat
-    private Bat bat;
-
     // Witches
     private final Pool<Witch> witchPool = new Pool<Witch>() {
         @Override
@@ -76,14 +69,26 @@ public class GameScreen extends ScreenAdapter {
             return new Witch();
         }
     };
-
     private final Array<Witch> witches = new Array<>();
-
-    private Integer witchCount = 0;
-    private float witchTimer = 0;
-
     // Trees
     private final IntMap<Tree> chunkTrees = new IntMap<>();
+    private FitViewport viewport;
+    private OrthographicCamera camera;
+    private Stage stage;
+    private Animation<TextureRegion> witchAnimation;
+    private TreesData treesData;
+    private TextureRegion fireballRegion;
+    private boolean locateActive = false;
+    private float locateElapsed = 0f;
+    private float locateCooldownTimer = 0f;
+    private float locateCurrentRange = 0f;
+    private int locatePulseId = 0;
+    private float attackCooldownTimer = 0f;
+    private SonarEffect sonarEffect;
+    // Bat
+    private Bat bat;
+    private Integer witchCount = 0;
+    private float witchTimer = 0;
 
     public GameScreen(BuggyGame game) {
         this.game = game;
@@ -116,8 +121,11 @@ public class GameScreen extends ScreenAdapter {
         witchAnimation =
             WitchAnimation.createWitchAnimation(atlas);
 
+        sonarEffect = new SonarEffect();
+
         bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
         bat.toFront();
+
         stage.addActor(bat);
 
         setupInputs();
@@ -126,7 +134,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0f, 0f, 0f, 0);
+        ScreenUtils.clear(0f, 0f, 0f, 1f);
 
         handleCamera(delta);
         gameLoop(delta);
@@ -134,6 +142,8 @@ public class GameScreen extends ScreenAdapter {
         stage.act(delta);
         stage.draw();
 //        drawDebug();
+
+        sonarEffect.draw(camera.combined);
     }
 
 
@@ -146,6 +156,9 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         stage.dispose();
+        if (sonarEffect != null) {
+            sonarEffect.dispose();
+        }
     }
 
     private void setupInputs() {
@@ -173,7 +186,6 @@ public class GameScreen extends ScreenAdapter {
                 return false;
             }
 
-
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.SPACE) {
@@ -197,8 +209,8 @@ public class GameScreen extends ScreenAdapter {
         ShapeRenderer sr = game.getShapeRenderer();
         sr.setProjectionMatrix(camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Line);
-        sr.line(0,0, WORLD_WIDTH, 0);
-        sr.line(0,0, 0, WORLD_HEIGHT);
+        sr.line(0, 0, WORLD_WIDTH, 0);
+        sr.line(0, 0, 0, WORLD_HEIGHT);
 
         sr.end();
     }
@@ -206,7 +218,7 @@ public class GameScreen extends ScreenAdapter {
     private void handleCamera(float delta) {
         Vector3 pos = new Vector3(bat.getCenter(), 0);
         System.out.println(pos.y);
-        pos.y = Math.max(WORLD_HEIGHT/2f-1f, pos.y);
+        pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
         camera.position.lerp(
             pos,
             0.5f * delta
@@ -296,10 +308,10 @@ public class GameScreen extends ScreenAdapter {
 
             Tree tree = new Tree(x, 0f, width, height, tr);
             tree.setPerchPoints(treesData.trees.get(randomTreeIndex).perchPoints);
-            tree.addListener(new InputListener(){
+            tree.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    if (button == Input.Buttons.LEFT){
+                    if (button == Input.Buttons.LEFT) {
                         Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
                         if (closestPoint == null) return false;
 
@@ -342,11 +354,20 @@ public class GameScreen extends ScreenAdapter {
 
         locateOrigin.set(bat.getCenterX(), bat.getCenterY());
         bat.getAimDirection(locateDirection);
+        sonarEffect.start(
+            locateOrigin,
+            locateDirection,
+            LOCATE_MAX_RANGE,
+            LOCATE_DURATION,
+            LOCATE_HALF_ANGLE
+        );
 
         locatePulseId++; // vsak strel svoj ID
     }
 
     private void updateLocate(float delta) {
+        sonarEffect.update(delta);
+
         if (locateCooldownTimer > 0f) {
             locateCooldownTimer = Math.max(
                 0f,

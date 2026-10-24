@@ -143,6 +143,10 @@ public class GameScreen extends ScreenAdapter {
         stage.draw();
 //        drawDebug();
 
+        if (sonarEffect.isActive()) {
+            sonarEffect.setOrigin(bat.getCenter());
+        }
+
         sonarEffect.draw(camera.combined);
     }
 

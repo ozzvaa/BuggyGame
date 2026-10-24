@@ -140,4 +140,8 @@ public class SonarEffect implements Disposable {
     public void dispose() {
         shapeRenderer.dispose();
     }
+
+    public void setOrigin(Vector2 origin) {
+        this.origin.set(origin);
+    }
 }

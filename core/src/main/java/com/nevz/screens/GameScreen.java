@@ -129,7 +129,7 @@ public class GameScreen extends ScreenAdapter {
         stage.addActor(bat);
 
         setupInputs();
-        stage.setDebugAll(true);
+        stage.setDebugAll(false);
     }
 
     @Override
@@ -271,7 +271,6 @@ public class GameScreen extends ScreenAdapter {
         Witch witch = witchPool.obtain();
         witch.setAnimation(witchAnimation);
         witch.spawn(bat.getCenter());
-        System.out.println("Spawned witch at: "+witch.getCenter());
         stage.addActor(witch);
         witches.add(witch);
         witchCount++;
@@ -483,7 +482,7 @@ public class GameScreen extends ScreenAdapter {
     private void revealNearby() {
         // Trees
         int chunkId = Utils.getChunk(bat.getCenter().x);
-        for (int i = chunkId -1; i < chunkId + 2; i++) {
+        for (int i = chunkId - 1; i < chunkId + 2; i++) {
             Tree nearTree = chunkTrees.get(i);
             if (nearTree != null) {
 
@@ -499,10 +498,11 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
-        for (Witch witch: witches) {
-            if (witch.getNearbyAlpha() <= 0 && (witch.getCenter().dst2(bat.getCenter()) > witch.getHeight()*witch.getHeight()*5)) continue; // Optimisation to not check every witch every time
+        for (Witch witch : witches) {
+            if (witch.getNearbyAlpha() <= 0 && (witch.getCenter().dst2(bat.getCenter()) > witch.getHeight() * witch.getHeight() * 5))
+                continue; // Optimisation to not check every witch every time
 
-            float minDistance = witch.getWidth()*3;
+            float minDistance = witch.getWidth() * 1.5f;
             float visibilityPercent = Utils.calculateNearbyVisibility(
                 bat.getCenter(),
                 witch.getCenter(),

@@ -129,7 +129,7 @@ public class GameScreen extends ScreenAdapter {
         stage.addActor(bat);
 
         setupInputs();
-        stage.setDebugAll(true);
+        stage.setDebugAll(false);
     }
 
     @Override
@@ -217,7 +217,6 @@ public class GameScreen extends ScreenAdapter {
 
     private void handleCamera(float delta) {
         Vector3 pos = new Vector3(bat.getCenter(), 0);
-        System.out.println(pos.y);
         pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
         camera.position.lerp(
             pos,
@@ -232,6 +231,8 @@ public class GameScreen extends ScreenAdapter {
         handleWitches(delta);
         handleTrees();
         handleFireballCollisions();
+        revealNearby();
+
     }
 
     // Witches
@@ -397,6 +398,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+
     private void revealWitchesReachedByPulse() {
         float rangeSquared =
             locateCurrentRange * locateCurrentRange;
@@ -469,6 +471,29 @@ public class GameScreen extends ScreenAdapter {
 
             // Sonar dosegel drevo
             tree.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void revealNearby() {
+        // Trees
+        int chunkId = Utils.getChunk(bat.getCenter().x);
+        for (int i = chunkId -1; i < chunkId + 2; i++) {
+            Tree nearTree = chunkTrees.get(i);
+            if (nearTree != null) {
+
+                float minDistance = nearTree.getWidth();
+
+                float visibilityPercent = Utils.calculateNearbyVisibility(
+                    bat.getCenter(),
+                    nearTree.getCenter(),
+                    minDistance / 2f
+                );
+
+                nearTree.setNearbyAlpha(visibilityPercent);
+            }
+        }
+
+        for (Witch witch: witches) {
         }
     }
 

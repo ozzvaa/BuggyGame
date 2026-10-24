@@ -1,21 +1,15 @@
 package com.nevz.entities;
 
 import static com.nevz.config.GameConfig.PERCH_RADIUS;
-import static com.nevz.config.GameConfig.REVEAL_FADE_TIME;
 import static com.nevz.config.GameConfig.REVEAL_FADE_TIME_TREE;
-import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME;
 import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME_TREE;
-import static com.nevz.config.GameConfig.TREE_WIDTH;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Array;
-import com.nevz.config.GameConfig;
 import com.nevz.utils.Utils;
 
 
@@ -24,6 +18,7 @@ public class Tree extends Entity {
     private final int chunkId;
 
     private float sonarAlpha = 0f;
+    private float nearbyAlpha = 0f;
     private float revealHoldTimer = 0f;
     private int lastLocatePulseId = -1;
 
@@ -66,9 +61,11 @@ public class Tree extends Entity {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (textureRegion == null || sonarAlpha <= 0f) {
+        if (textureRegion == null || sonarAlpha <= 0f && nearbyAlpha <= 0) {
             return;
         }
+
+        float alpha = Math.max(nearbyAlpha, sonarAlpha);
 
         Color oldBatchColor = batch.getColor().cpy();
         Color actorColor = getColor();
@@ -77,7 +74,7 @@ public class Tree extends Entity {
             actorColor.r,
             actorColor.g,
             actorColor.b,
-            actorColor.a * parentAlpha * sonarAlpha
+            actorColor.a * parentAlpha * alpha
         );
 
         batch.draw(
@@ -124,7 +121,6 @@ public class Tree extends Entity {
             }
         }
         if (closestPoint == null || closestDist > PERCH_RADIUS) return null;
-        System.out.println("Closest Point: " + closestPoint.x + ", " + closestPoint.y + " Dst: " + closestDist);
         return closestPoint;
     }
 
@@ -145,6 +141,10 @@ public class Tree extends Entity {
 
     public float getSonarAlpha() {
         return sonarAlpha;
+    }
+
+    public void setNearbyAlpha(float alpha) {
+        nearbyAlpha = alpha;
     }
 
     @Override

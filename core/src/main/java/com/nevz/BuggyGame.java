@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.nevz.assets.AssetDescriptors;
 import com.nevz.screens.GameScreen;
+import com.nevz.screens.TreeScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class BuggyGame extends Game {
@@ -32,7 +33,7 @@ public class BuggyGame extends Game {
 
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);
 
-        setScreen(new GameScreen(this));
+        setScreen(new TreeScreen(this));
     }
 
     @Override

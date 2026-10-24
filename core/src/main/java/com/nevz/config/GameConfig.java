@@ -27,8 +27,10 @@ public class GameConfig {
         GameConfig.WORLD_WIDTH * 0.8f;
     public static final float LOCATE_HALF_ANGLE = 20f;
 
-    public static final float TREE_WIDTH = 15 * UNIT;
-    public static final float TREE_HEIGHT = 15 * UNIT;
+    public static final float TREE_WIDTH = 20 * UNIT;
+    public static final float TREE_HEIGHT = 20 * UNIT;
+    public static final float PERCH_RADIUS = 2 * UNIT;
+
 
     public static final float ATTACK_COOLDOWN = 5f;
 

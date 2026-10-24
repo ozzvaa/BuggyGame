@@ -41,6 +41,10 @@ public class Entity extends Actor {
         return new Vector2(getX() + getWidth() / 2f, getY() + getHeight() / 2f);
     }
 
+    public void setCenter(Vector2 pos) {
+        setPosition(pos.x - getWidth() / 2f, pos.y - getHeight() / 2f);
+    }
+
     public float getCenterX() {
         return getX() + getWidth() / 2f;
     }

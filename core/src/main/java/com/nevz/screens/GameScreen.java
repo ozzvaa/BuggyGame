@@ -11,15 +11,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.nevz.BuggyGame;
 import com.nevz.animation.BatAnimation;
 import com.nevz.animation.WitchAnimation;
@@ -37,7 +38,8 @@ import static com.nevz.config.GameConfig.*;
 public class GameScreen extends ScreenAdapter {
 
     private final BuggyGame game;
-    private Viewport viewport;
+    private FitViewport viewport;
+    private OrthographicCamera camera;
     private Stage stage;
     private Animation<TextureRegion> witchAnimation;
     private final Array<TextureRegion> treeRegions = new Array<>();
@@ -85,7 +87,7 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         AssetManager assetManager = game.getAssetManager();
 
-        OrthographicCamera camera = new OrthographicCamera();
+        camera = new OrthographicCamera();
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
 
@@ -118,14 +120,19 @@ public class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         ScreenUtils.clear(0f, 0f, 0f, 0);
 
+        handleCamera(delta);
         gameLoop(delta);
+
         stage.act(delta);
         stage.draw();
+//        drawDebug();
     }
+
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        camera.update();
     }
 
     @Override
@@ -164,6 +171,27 @@ public class GameScreen extends ScreenAdapter {
         });
 
         Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    private void drawDebug() {
+        ShapeRenderer sr = game.getShapeRenderer();
+        sr.setProjectionMatrix(camera.combined);
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.line(0,0, WORLD_WIDTH, 0);
+        sr.line(0,0, 0, WORLD_HEIGHT);
+
+        sr.end();
+    }
+
+    private void handleCamera(float delta) {
+        Vector3 pos = new Vector3(bat.getCenter(), 0);
+        System.out.println(pos.y);
+        pos.y = Math.max(WORLD_HEIGHT/2f-1f, pos.y);
+        camera.position.lerp(
+            pos,
+            0.5f * delta
+        );
+        camera.update();
     }
 
     private void gameLoop(float delta) {

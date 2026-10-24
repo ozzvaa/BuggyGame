@@ -6,15 +6,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.nevz.config.GameConfig;
 
-import org.w3c.dom.Text;
-
 public class Bat extends Entity {
     private final float SPEED = GameConfig.BAT_SPEED;
 
     private final Animation<TextureRegion> animation;
     private final TextureRegion perchTexture;
-    private boolean perching = false;
-
+    private boolean perchingTo = false;
     private float stateTime = 0f;
 
     private final Vector2 velocity = new Vector2(0, 0);
@@ -45,7 +42,7 @@ public class Bat extends Entity {
         TextureRegion currentFrame =
             animation.getKeyFrame(stateTime);
 
-        if (perching && velocity.isZero()) {
+        if (isPerchingTo()) {
             currentFrame = perchTexture;
         }
 
@@ -69,7 +66,7 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
-        if (perching ) {
+        if (perchingTo) {
             followPerch();
         }
         else {
@@ -109,7 +106,6 @@ public class Bat extends Entity {
 
         if (toTarget.len() < 0.1) {
             direction.set(0, 0);
-            System.out.println("Perch found!");
         } else {
             direction.set(toTarget.cpy().nor());
         }
@@ -138,10 +134,18 @@ public class Bat extends Entity {
     public void perchAtPoint(Vector2 perch) {
         if (perch != null) {
             perchTarget.set(perch);
-            perching = true;
+            perchingTo = true;
         }
         else {
-            perching = false;
+            perchingTo = false;
         }
+    }
+
+    public boolean isPerchingTo() {
+        return perchingTo && velocity.isZero();
+    }
+
+    public void unperch() {
+        perchingTo = false;
     }
 }

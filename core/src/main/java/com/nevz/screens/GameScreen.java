@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -15,9 +16,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -28,6 +32,7 @@ import com.nevz.assets.AssetDescriptors;
 import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
 import com.nevz.entities.*;
+import com.nevz.utils.TreesData;
 import com.nevz.utils.Utils;
 
 import static com.nevz.config.GameConfig.*;
@@ -43,6 +48,7 @@ public class GameScreen extends ScreenAdapter {
     private Stage stage;
     private Animation<TextureRegion> witchAnimation;
     private final Array<TextureRegion> treeRegions = new Array<>();
+    private TreesData treesData;
     private final Array<TextureRegion> pumpkinRegions = new Array<>();
     private TextureRegion fireballRegion;
 
@@ -96,6 +102,7 @@ public class GameScreen extends ScreenAdapter {
 
         treeRegions.clear();
         treeRegions.addAll(atlas.findRegions(RegionNames.TREE));
+        loadTreeData();
 
         fireballRegion = atlas.findRegion(RegionNames.FIREBALL);
         pumpkinRegions.addAll(atlas.findRegions(RegionNames.PUMPKIN));
@@ -110,10 +117,11 @@ public class GameScreen extends ScreenAdapter {
             WitchAnimation.createWitchAnimation(atlas);
 
         bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
+        bat.toFront();
         stage.addActor(bat);
 
         setupInputs();
-//        stage.setDebugAll(true);
+        stage.setDebugAll(true);
     }
 
     @Override
@@ -145,6 +153,17 @@ public class GameScreen extends ScreenAdapter {
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(new InputAdapter() {
             @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (button == Input.Buttons.LEFT) {
+                    if (bat.isPerchingTo()) {
+                        bat.unperch();
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
             public boolean mouseMoved(int screenX, int screenY) {
                 Vector2 pos = stage.screenToStageCoordinates(
                     new Vector2(screenX, screenY)
@@ -153,6 +172,7 @@ public class GameScreen extends ScreenAdapter {
                 bat.setTarget(pos);
                 return false;
             }
+
 
             @Override
             public boolean keyDown(int keycode) {
@@ -247,6 +267,7 @@ public class GameScreen extends ScreenAdapter {
         for (int i = chunk - chunk_span; i < chunk + chunk_span; i++) {
             if (!chunkTrees.containsKey(i)) {
                 spawnTree(i);
+                bat.toFront();
             }
         }
     }
@@ -254,20 +275,58 @@ public class GameScreen extends ScreenAdapter {
     private void spawnTree(int chunkId) {
         int chance = MathUtils.random(0, 2);
 
-        if (chance == 2) {
-            float x = MathUtils.random(
-                chunkId * GameConfig.CHUNK_SIZE,
-                (chunkId + 1) * GameConfig.CHUNK_SIZE
-            );
+        float x = MathUtils.random(
+            chunkId * GameConfig.CHUNK_SIZE,
+            (chunkId + 1) * GameConfig.CHUNK_SIZE
+        );
 
-            TextureRegion randomTree = treeRegions.random();
-            Tree tree = new Tree(x, 0f, randomTree);
+        if (chunkId == -1 || chunkId == 0 || chunkId == 1) {
+            x = chunkId * CHUNK_SIZE + CHUNK_SIZE / 2f;
+        }
+
+        if (chance == 2 || chunkId == -1 || chunkId == 0 || chunkId == 1) {
+            int randomTreeIndex = MathUtils.random(0, treesData.trees.size - 1);
+            TextureRegion tr = treeRegions.get(randomTreeIndex);
+
+            float width = tr.getRegionWidth();
+            float height = tr.getRegionHeight();
+            float scale = TREE_WIDTH / Math.min(width, height);
+            width *= scale;
+            height *= scale;
+
+            Tree tree = new Tree(x, 0f, width, height, tr);
+            tree.setPerchPoints(treesData.trees.get(randomTreeIndex).perchPoints);
+            tree.addListener(new InputListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    if (button == Input.Buttons.LEFT){
+                        Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
+                        if (closestPoint == null) return false;
+
+                        closestPoint = tree.localToStageCoordinates(closestPoint.cpy());
+                        bat.perchAtPoint(closestPoint);
+
+                    }
+                    return false;
+                }
+            });
 
             chunkTrees.put(chunkId, tree);
             stage.addActor(tree);
         } else {
             chunkTrees.put(chunkId, null);
         }
+    }
+
+    private void loadTreeData() {
+        FileHandle file = Gdx.files.local("trees.json");
+
+        if (!file.exists()) return;
+
+        Json json = new Json();
+        treesData = json.fromJson(TreesData.class, file);
+
+        Gdx.app.log("TreeScreen", "Trees loaded from " + file.path());
     }
 
     // Echolocation

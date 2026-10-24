@@ -19,7 +19,10 @@ public class GameConfig {
     public static final float WITCH_TIMER = 3;
 
     public static final float REVEAL_HOLD_TIME = 0.35f;
+    public static final float REVEAL_HOLD_TIME_TREE = 3f;
+
     public static final float REVEAL_FADE_TIME = 1.0f;
+    public static final float REVEAL_FADE_TIME_TREE = 2f;
 
     public static final float LOCATE_COOLDOWN = 2f;
     public static final float LOCATE_DURATION = 0.7f;

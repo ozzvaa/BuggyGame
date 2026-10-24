@@ -33,7 +33,7 @@ public class BuggyGame extends Game {
 
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);
 
-        setScreen(new TreeScreen(this));
+        setScreen(new GameScreen(this));
     }
 
     @Override

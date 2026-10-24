@@ -2,7 +2,10 @@ package com.nevz.entities;
 
 import static com.nevz.config.GameConfig.PERCH_RADIUS;
 import static com.nevz.config.GameConfig.REVEAL_FADE_TIME;
+import static com.nevz.config.GameConfig.REVEAL_FADE_TIME_TREE;
 import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME;
+import static com.nevz.config.GameConfig.REVEAL_HOLD_TIME_TREE;
+import static com.nevz.config.GameConfig.TREE_WIDTH;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -24,26 +27,13 @@ public class Tree extends Entity {
     private float revealHoldTimer = 0f;
     private int lastLocatePulseId = -1;
 
-    private Array<Vector2> perchPoints = new Array<>();
-
-    public Tree(float x, float y, TextureRegion textureRegion) {
-        super(x, y, GameConfig.TREE_WIDTH, GameConfig.TREE_HEIGHT);
-        this.textureRegion = textureRegion;
-        this.chunkId = Utils.getChunk(x);
-    }
+    private Array<Vector2> perchPoints = new Array<>(); // Are in coordinates relative to Tree Entity Actor
 
     public Tree(float x, float y, float width, float height, TextureRegion textureRegion) {
         super(x, y, width, height);
         this.textureRegion = textureRegion;
         this.chunkId = Utils.getChunk(x);
 
-        addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return false;
-            }
-
-        });
     }
 
     public void revealFromLocate(int pulseId) {
@@ -54,7 +44,7 @@ public class Tree extends Entity {
 
         lastLocatePulseId = pulseId;
         sonarAlpha = 1f;
-        revealHoldTimer = REVEAL_HOLD_TIME;
+        revealHoldTimer = REVEAL_HOLD_TIME_TREE;
     }
 
     @Override
@@ -69,7 +59,7 @@ public class Tree extends Entity {
         } else if (sonarAlpha > 0f) {
             sonarAlpha = Math.max(
                 0f,
-                sonarAlpha - delta / REVEAL_FADE_TIME
+                sonarAlpha - delta / REVEAL_FADE_TIME_TREE
             );
         }
     }

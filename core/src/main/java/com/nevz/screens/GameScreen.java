@@ -120,7 +120,6 @@ public class GameScreen extends ScreenAdapter {
 
         gameLoop(delta);
         stage.act(delta);
-        handleFireballCollisions();
         stage.draw();
     }
 
@@ -172,6 +171,7 @@ public class GameScreen extends ScreenAdapter {
         updateLocate(delta);
         handleWitches(delta);
         handleTrees();
+        handleFireballCollisions();
     }
 
     // Witches

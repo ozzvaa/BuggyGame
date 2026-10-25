@@ -103,7 +103,7 @@ public class Bat extends Entity {
             stamina = Math.min(GameConfig.MAX_STAMINA, stamina + delta * 10f);
 
         } else {
-            stamina -= delta * 10;
+            stamina -= delta;
         }
 
     }
@@ -140,6 +140,10 @@ public class Bat extends Entity {
             );
         }
         return 0;
+    }
+
+    public float getStamina() {
+        return stamina;
     }
 
     public void setTarget(Vector2 target) {
@@ -210,5 +214,9 @@ public class Bat extends Entity {
 
     public void unperch() {
         perchingTo = false;
+    }
+
+    public void resetStamina() {
+        stamina = GameConfig.MAX_STAMINA;
     }
 }

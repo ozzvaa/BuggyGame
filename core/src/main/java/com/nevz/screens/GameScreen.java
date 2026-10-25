@@ -16,6 +16,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -43,6 +45,7 @@ import com.nevz.effects.SonarEffect;
 import com.nevz.entities.Bat;
 import com.nevz.entities.Fireball;
 import com.nevz.entities.Pumpkin;
+import com.nevz.entities.StatusBar;
 import com.nevz.entities.Tree;
 import com.nevz.entities.Witch;
 import com.nevz.utils.TreesData;
@@ -88,6 +91,9 @@ public class GameScreen extends ScreenAdapter {
     private Bat bat;
     private Integer witchCount = 0;
     private float witchTimer = 0;
+    private StatusBar healthBar;
+    private StatusBar staminaBar;
+    private Array<StatusBar> statusBars = new Array<>();
 
     public GameScreen(BuggyGame game) {
         this.game = game;
@@ -100,6 +106,27 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
+
+
+        healthBar = new StatusBar(
+            10, 450,
+            120, 15, Color.RED
+        );
+
+        staminaBar = new StatusBar(
+            10, 435,
+            120, 10, Color.YELLOW
+        );
+
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        statusBars.add(healthBar);
+        statusBars.add(staminaBar);
+        stage.addActor(healthBar);
+        stage.addActor(staminaBar);
+
 
         TextureAtlas atlas =
             assetManager.get(AssetDescriptors.ATLAS);
@@ -141,6 +168,7 @@ public class GameScreen extends ScreenAdapter {
         stage.act(delta);
         stage.draw();
 //        drawDebug();
+        handleStatus();
 
         if (sonarEffect.isActive()) {
             sonarEffect.setOrigin(bat.getCenter());
@@ -217,6 +245,12 @@ public class GameScreen extends ScreenAdapter {
         sr.line(0, 0, 0, WORLD_HEIGHT);
 
         sr.end();
+    }
+
+    public void handleStatus() {
+        healthBar.render(game.getShapeRenderer());
+        staminaBar.setPercentage(bat.getStamina());
+        staminaBar.render(game.getShapeRenderer());
     }
 
     private void handleCamera(float delta) {
@@ -418,6 +452,7 @@ public class GameScreen extends ScreenAdapter {
         revealWitchesReachedByPulse();
         revealTreesReachedByPulse();
         revealPumpkinsReachedByPulse();
+        revealStatusBarReachedByPulse();
 
         if (progress >= 1f) {
             locateActive = false;
@@ -497,6 +532,45 @@ public class GameScreen extends ScreenAdapter {
 
             // Sonar dosegel drevo
             tree.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void revealStatusBarReachedByPulse() {
+        float rangeSquared =
+            locateCurrentRange * locateCurrentRange;
+
+        float minDot =
+            MathUtils.cosDeg(LOCATE_HALF_ANGLE);
+
+
+        for (StatusBar bar : statusBars) {
+
+            Vector2 barStageCenter = bar.getStageCenter();
+            System.out.println(barStageCenter);
+
+            candidateOffset.set(
+                barStageCenter.x - locateOrigin.x,
+                barStageCenter.y - locateOrigin.y
+            );
+
+
+            float distanceSquared = candidateOffset.len2();
+
+            // Sonar drevesa še ni dosegel
+            if (distanceSquared > rangeSquared) {
+                continue;
+            }
+
+            // Ali je drevo v kotu
+            if (distanceSquared > 0.0001f) {
+                candidateOffset.nor();
+
+                if (candidateOffset.dot(locateDirection) < minDot) {
+                    continue;
+                }
+            }
+
+            bar.revealFromLocate(locatePulseId);
         }
     }
 

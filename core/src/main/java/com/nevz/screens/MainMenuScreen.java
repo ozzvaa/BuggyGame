@@ -164,6 +164,7 @@ public class MainMenuScreen extends ScreenAdapter {
         updateAttackCooldown(delta);
         updateLocate(delta);
         handleFireballCollisions();
+        bat.resetStamina();
 
         stage.draw();
 

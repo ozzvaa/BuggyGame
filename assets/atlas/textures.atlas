@@ -1,334 +1,348 @@
 
 textures.png
-size: 4096, 128
+size: 2048, 512
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
+Start
+  rotate: false
+  xy: 101, 46
+  size: 140, 55
+  orig: 140, 55
+  offset: 0, 0
+  index: -1
+Start_button
+  rotate: false
+  xy: 2, 103
+  size: 1271, 401
+  orig: 1271, 401
+  offset: 0, 0
+  index: -1
 Tree
   rotate: false
-  xy: 2, 19
+  xy: 2, 2
   size: 97, 99
   orig: 97, 99
   offset: 0, 0
   index: 13
 Tree
   rotate: false
-  xy: 101, 20
+  xy: 1275, 406
   size: 98, 98
   orig: 98, 98
   offset: 0, 0
   index: 33
 Tree
   rotate: false
-  xy: 201, 25
+  xy: 1275, 311
   size: 87, 93
   orig: 87, 93
   offset: 0, 0
   index: 8
 Tree
   rotate: false
-  xy: 290, 26
-  size: 87, 92
-  orig: 87, 92
-  offset: 0, 0
-  index: 35
-Tree
-  rotate: false
-  xy: 379, 19
+  xy: 1275, 210
   size: 81, 99
   orig: 81, 99
   offset: 0, 0
   index: 30
 Tree
   rotate: false
-  xy: 462, 21
+  xy: 1375, 412
+  size: 87, 92
+  orig: 87, 92
+  offset: 0, 0
+  index: 35
+Tree
+  rotate: false
+  xy: 1275, 111
   size: 80, 97
   orig: 80, 97
   offset: 0, 0
   index: 28
 Tree
   rotate: false
-  xy: 544, 19
-  size: 75, 99
-  orig: 75, 99
-  offset: 0, 0
-  index: 36
-Tree
-  rotate: false
-  xy: 621, 28
+  xy: 1464, 414
   size: 78, 90
   orig: 78, 90
   offset: 0, 0
   index: 9
 Tree
   rotate: false
-  xy: 701, 32
-  size: 78, 86
-  orig: 78, 86
+  xy: 1544, 405
+  size: 75, 99
+  orig: 75, 99
   offset: 0, 0
-  index: 20
+  index: 36
 Tree
   rotate: false
-  xy: 781, 33
-  size: 73, 85
-  orig: 73, 85
-  offset: 0, 0
-  index: 26
-Tree
-  rotate: false
-  xy: 856, 20
+  xy: 1621, 406
   size: 67, 98
   orig: 67, 98
   offset: 0, 0
   index: 24
 Tree
   rotate: false
-  xy: 925, 20
+  xy: 1690, 406
   size: 67, 98
   orig: 67, 98
   offset: 0, 0
   index: 32
 Tree
   rotate: false
-  xy: 994, 20
-  size: 60, 98
-  orig: 60, 98
+  xy: 1759, 418
+  size: 78, 86
+  orig: 78, 86
   offset: 0, 0
-  index: 12
+  index: 20
 Tree
   rotate: false
-  xy: 1056, 22
-  size: 57, 96
-  orig: 57, 96
+  xy: 1839, 419
+  size: 73, 85
+  orig: 73, 85
   offset: 0, 0
-  index: 6
+  index: 26
 Tree
   rotate: false
-  xy: 1115, 32
+  xy: 1914, 418
   size: 66, 86
   orig: 66, 86
   offset: 0, 0
   index: 11
 Tree
   rotate: false
-  xy: 1183, 30
-  size: 60, 88
-  orig: 60, 88
-  offset: 0, 0
-  index: 4
-Tree
-  rotate: false
-  xy: 1245, 44
-  size: 72, 74
-  orig: 72, 74
-  offset: 0, 0
-  index: 25
-Tree
-  rotate: false
-  xy: 1319, 50
+  xy: 243, 33
   size: 76, 68
   orig: 76, 68
   offset: 0, 0
   index: 27
 Tree
   rotate: false
-  xy: 1397, 43
+  xy: 321, 27
+  size: 72, 74
+  orig: 72, 74
+  offset: 0, 0
+  index: 25
+Tree
+  rotate: false
+  xy: 395, 26
   size: 67, 75
   orig: 67, 75
   offset: 0, 0
   index: 19
 Tree
   rotate: false
-  xy: 1466, 39
+  xy: 464, 22
   size: 65, 79
   orig: 65, 79
   offset: 0, 0
   index: 31
 Tree
   rotate: false
-  xy: 1533, 40
+  xy: 531, 23
   size: 62, 78
   orig: 62, 78
   offset: 0, 0
   index: 16
 Tree
   rotate: false
-  xy: 1597, 46
-  size: 66, 72
-  orig: 66, 72
+  xy: 595, 13
+  size: 60, 88
+  orig: 60, 88
   offset: 0, 0
-  index: 22
+  index: 4
 Tree
   rotate: false
-  xy: 1665, 36
-  size: 60, 82
-  orig: 60, 82
+  xy: 657, 3
+  size: 60, 98
+  orig: 60, 98
   offset: 0, 0
-  index: 34
+  index: 12
 Tree
   rotate: false
-  xy: 1727, 32
-  size: 58, 86
-  orig: 58, 86
+  xy: 719, 5
+  size: 57, 96
+  orig: 57, 96
   offset: 0, 0
-  index: 29
+  index: 6
 Tree
   rotate: false
-  xy: 1787, 31
-  size: 52, 87
-  orig: 52, 87
-  offset: 0, 0
-  index: 7
-Tree
-  rotate: false
-  xy: 1841, 23
+  xy: 778, 6
   size: 52, 95
   orig: 52, 95
   offset: 0, 0
   index: 14
 Tree
   rotate: false
-  xy: 1895, 20
+  xy: 832, 3
   size: 50, 98
   orig: 50, 98
   offset: 0, 0
   index: 10
 Tree
   rotate: false
-  xy: 1947, 24
+  xy: 884, 15
+  size: 58, 86
+  orig: 58, 86
+  offset: 0, 0
+  index: 29
+Tree
+  rotate: false
+  xy: 944, 19
+  size: 60, 82
+  orig: 60, 82
+  offset: 0, 0
+  index: 34
+Tree
+  rotate: false
+  xy: 1006, 29
+  size: 66, 72
+  orig: 66, 72
+  offset: 0, 0
+  index: 22
+Tree
+  rotate: false
+  xy: 1364, 310
   size: 47, 94
   orig: 47, 94
   offset: 0, 0
   index: 5
 Tree
   rotate: false
-  xy: 1996, 28
+  xy: 1358, 221
+  size: 52, 87
+  orig: 52, 87
+  offset: 0, 0
+  index: 7
+Tree
+  rotate: false
+  xy: 1413, 320
   size: 48, 90
   orig: 48, 90
   offset: 0, 0
   index: 18
 Tree
   rotate: false
-  xy: 2046, 43
+  xy: 1357, 133
   size: 54, 75
   orig: 54, 75
   offset: 0, 0
   index: 21
 Tree
   rotate: false
-  xy: 2498, 58
+  xy: 1357, 71
   size: 57, 60
   orig: 57, 60
   offset: 0, 0
   index: 15
 Tree
   rotate: false
-  xy: 2557, 57
-  size: 44, 61
-  orig: 44, 61
-  offset: 0, 0
-  index: 1
-Tree
-  rotate: false
-  xy: 2603, 57
-  size: 44, 61
-  orig: 44, 61
-  offset: 0, 0
-  index: 2
-Tree
-  rotate: false
-  xy: 2649, 50
+  xy: 1825, 348
   size: 40, 68
   orig: 40, 68
   offset: 0, 0
   index: 3
 Tree
   rotate: false
-  xy: 2691, 47
+  xy: 1867, 346
   size: 39, 71
   orig: 39, 71
   offset: 0, 0
   index: 17
+Tree
+  rotate: false
+  xy: 1908, 355
+  size: 44, 61
+  orig: 44, 61
+  offset: 0, 0
+  index: 1
+Tree
+  rotate: false
+  xy: 1272, 40
+  size: 44, 61
+  orig: 44, 61
+  offset: 0, 0
+  index: 2
 bat
   rotate: false
-  xy: 2102, 54
+  xy: 1982, 440
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 bat_perch
   rotate: false
-  xy: 2168, 54
+  xy: 1982, 374
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 fireball
   rotate: false
-  xy: 2, 2
+  xy: 101, 29
   size: 30, 15
   orig: 30, 15
   offset: 0, 0
   index: -1
 pumpkin
   rotate: false
-  xy: 2732, 96
+  xy: 1954, 394
   size: 22, 22
   orig: 22, 22
   offset: 0, 0
   index: 2
 pumpkin
   rotate: false
-  xy: 2732, 74
+  xy: 101, 7
   size: 19, 20
   orig: 19, 20
   offset: 0, 0
   index: 3
 pumpkin
   rotate: false
-  xy: 2756, 99
+  xy: 1954, 373
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 4
 pumpkin
   rotate: false
-  xy: 2778, 99
+  xy: 1954, 352
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 5
 pumpkin
   rotate: false
-  xy: 2732, 53
+  xy: 133, 25
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 2234, 54
+  xy: 1074, 37
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 0
 witch
   rotate: false
-  xy: 2300, 54
+  xy: 1140, 37
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 2366, 54
+  xy: 1206, 37
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 2
 witch
   rotate: false
-  xy: 2432, 54
+  xy: 1759, 352
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

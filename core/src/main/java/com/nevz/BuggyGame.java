@@ -5,17 +5,24 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.nevz.assets.AssetDescriptors;
-import com.nevz.screens.GameScreen;
 import com.nevz.screens.MainMenuScreen;
-import com.nevz.screens.TreeScreen;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+/**
+ * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
+ */
 public class BuggyGame extends Game {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private AssetManager assetManager;
     private TextureAtlas gameAtlas;
+    private Sound echoSound;
+    private Sound attackSound;
+    private Sound gameOverSound;
+    private Music ambientMusic;
+
 
     @Override
     public void create() {
@@ -25,14 +32,23 @@ public class BuggyGame extends Game {
 
         // Assets
         assetManager.load(AssetDescriptors.ATLAS);
-
-
+        assetManager.load(AssetDescriptors.ECHO_SOUND);
+        assetManager.load(AssetDescriptors.ATTACK_SOUND);
+        assetManager.load(AssetDescriptors.AMBIENT_MUSIC);
+        assetManager.load(AssetDescriptors.GAME_OVER_SOUND);
         assetManager.load(AssetDescriptors.BAT_SHEET);
-        assetManager.finishLoading();
 
         assetManager.finishLoading();
 
+        echoSound = assetManager.get(AssetDescriptors.ECHO_SOUND);
+        attackSound = assetManager.get(AssetDescriptors.ATTACK_SOUND);
+        gameOverSound = assetManager.get(AssetDescriptors.GAME_OVER_SOUND);
+        ambientMusic = assetManager.get(AssetDescriptors.AMBIENT_MUSIC);
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);
+
+        ambientMusic.setLooping(true);
+        ambientMusic.setVolume(0.4f);
+        ambientMusic.play();
 
         setScreen(new MainMenuScreen(this));
     }
@@ -45,13 +61,37 @@ public class BuggyGame extends Game {
         gameAtlas.dispose();
     }
 
+    public void playEchoSound() {
+        if (echoSound != null) {
+            echoSound.play(0.8f);
+        }
+    }
+
+    public void playAttackSound() {
+        if (attackSound != null) {
+            attackSound.play(0.6f);
+        }
+    }
+
+    public void playBatFallSound() {
+        if(gameOverSound != null){
+            gameOverSound.play(0.8f);
+        }
+    }
+
     public SpriteBatch getBatch() {
         return batch;
     }
 
-    public ShapeRenderer getShapeRenderer() {return shapeRenderer;}
+    public ShapeRenderer getShapeRenderer() {
+        return shapeRenderer;
+    }
 
-    public AssetManager getAssetManager() {return assetManager;}
+    public AssetManager getAssetManager() {
+        return assetManager;
+    }
 
-    public TextureAtlas getGameAtlas() {return gameAtlas;}
+    public TextureAtlas getGameAtlas() {
+        return gameAtlas;
+    }
 }

@@ -208,6 +208,7 @@ public class MainMenuScreen extends ScreenAdapter {
         if (locateCooldownTimer > 0f || locateActive) {
             return;
         }
+        game.playEchoSound();
 
         locateActive = true;
         locateElapsed = 0f;
@@ -299,6 +300,7 @@ public class MainMenuScreen extends ScreenAdapter {
         if (attackCooldownTimer > 0f) {
             return;
         }
+        game.playAttackSound();
 
         Vector2 direction =
             bat.getAimDirection(new Vector2());

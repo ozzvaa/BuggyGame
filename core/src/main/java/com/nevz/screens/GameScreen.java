@@ -5,6 +5,7 @@ import static com.nevz.config.GameConfig.LOCATE_COOLDOWN;
 import static com.nevz.config.GameConfig.LOCATE_DURATION;
 import static com.nevz.config.GameConfig.LOCATE_HALF_ANGLE;
 import static com.nevz.config.GameConfig.LOCATE_MAX_RANGE;
+import static com.nevz.config.GameConfig.TREE_HEIGHT;
 import static com.nevz.config.GameConfig.TREE_WIDTH;
 import static com.nevz.config.GameConfig.WORLD_HEIGHT;
 import static com.nevz.config.GameConfig.WORLD_WIDTH;
@@ -170,7 +171,10 @@ public class GameScreen extends ScreenAdapter {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
         handleCamera(delta);
-        gameLoop(delta);
+
+        if (!bat.isDead()) {
+            gameLoop(delta);
+        }
 
         stage.act(delta);
         stage.draw();
@@ -234,7 +238,9 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 if (keycode == Input.Keys.A) {
-                    tryAttack();
+                    if (!bat.isDead()) {
+                        tryAttack();
+                    }
                     return true;
                 }
 
@@ -256,6 +262,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     public void handleStatus() {
+        healthBar.setPercentage(bat.getHealth());
         healthBar.render(game.getShapeRenderer());
         staminaBar.setPercentage(bat.getStamina());
         staminaBar.render(game.getShapeRenderer());
@@ -297,7 +304,7 @@ public class GameScreen extends ScreenAdapter {
         handleWitches(delta);
         handleTrees();
         handleFireballCollisions();
-        revealNearby();
+        handleNearby();
 
     }
 
@@ -321,9 +328,13 @@ public class GameScreen extends ScreenAdapter {
         }
 
         witchTimer = 0;
-        spawnWithces();
 
+        int witchSpawnFactor = (Utils.getChunk(bat.getY()) + 1 ) * 2;
 
+        for (int i = 0; i <= witchSpawnFactor; i++) {
+            spawnWithces();
+
+        }
     }
 
     private void spawnWithces() {
@@ -331,7 +342,33 @@ public class GameScreen extends ScreenAdapter {
 
         Witch witch = witchPool.obtain();
         witch.setAnimation(witchAnimation);
-        witch.spawn(bat.getCenter());
+
+        // Random position off screen
+        int side = MathUtils.random(0, 2);
+
+        Vector2 screenPos = new Vector2(0, 0);
+
+
+        switch (side) {
+            case 0: // Left
+                screenPos.set(-64, MathUtils.random(0, 480));
+                break;
+            case 1: // Up
+                screenPos.set(MathUtils.random(0, 640), -64);
+                break;
+            case 2: // Right
+                screenPos.set(640 + 64, MathUtils.random(0, 480));
+                break;
+        }
+
+
+        Vector2 worldPos = stage.screenToStageCoordinates(screenPos);
+        if (worldPos.y < TREE_HEIGHT) {
+            return;
+        }
+
+        witch.spawn(worldPos);
+
         stage.addActor(witch);
         witches.add(witch);
         witchCount++;
@@ -379,7 +416,6 @@ public class GameScreen extends ScreenAdapter {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if (button == Input.Buttons.LEFT) {
-                        System.out.println("Clicked");
 
                         Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
                         if (closestPoint == null) return false;
@@ -550,11 +586,12 @@ public class GameScreen extends ScreenAdapter {
         float minDot = MathUtils.cosDeg(LOCATE_HALF_ANGLE);
 
         for (StatusBar bar : statusBars) {
-            Vector2 barCenter = bar.getStageCenter();
+
+            Vector2 barStageCenter = bar.getStageCenter();
 
             candidateOffset.set(
-                barCenter.x - locateOrigin.x,
-                barCenter.y - locateOrigin.y
+                barStageCenter.x - locateOrigin.x,
+                barStageCenter.y - locateOrigin.y
             );
 
             float distanceSquared = candidateOffset.len2();
@@ -575,7 +612,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void revealNearby() {
+    private void handleNearby() {
         // Trees
         int chunkId = Utils.getChunk(bat.getCenter().x);
         for (int i = chunkId - 1; i < chunkId + 2; i++) {
@@ -604,6 +641,11 @@ public class GameScreen extends ScreenAdapter {
                 witch.getCenter(),
                 minDistance / 2f
             );
+
+            if (visibilityPercent == 1) {
+                bat.hurt();
+                witch.setRemoveWitch();
+            }
 
             witch.setNearbyAlpha(visibilityPercent);
 

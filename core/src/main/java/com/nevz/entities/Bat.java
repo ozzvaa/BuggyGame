@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.nevz.config.GameConfig;
 
 public class Bat extends Entity {
@@ -14,19 +15,17 @@ public class Bat extends Entity {
 
     private final Animation<TextureRegion> animation;
     private final TextureRegion perchTexture;
-    private boolean perchingTo = false;
-    private float stateTime = 0f;
-    private float health = GameConfig.MAX_HEALTH;
-    private float stamina = GameConfig.MAX_STAMINA;
-
     private final Vector2 velocity = new Vector2(0, 0);
-
     private final Vector2 perchTarget = new Vector2();
     private final Vector2 target = new Vector2();
     private final Vector2 toTarget = new Vector2(0, 0);
     private final Vector2 direction = new Vector2(1, 0);
     private final Sound fallSound;
     private final Sound sleepSound;
+    private boolean perchingTo = false;
+    private float stateTime = 0f;
+    private float health = GameConfig.MAX_HEALTH;
+    private float stamina = GameConfig.MAX_STAMINA;
     private boolean fallSoundPlayed = false;
     private boolean sleepSoundPlayed = false;
 
@@ -78,7 +77,9 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
-        if (stamina <= 0) {
+
+        if (stamina <= 0 || health <= 0) {
+
             if (!fallSoundPlayed) {
                 if (fallSound != null) {
                     fallSound.play(0.8f);
@@ -99,15 +100,15 @@ public class Bat extends Entity {
                 }
 
                 sleepSoundPlayed = true;
+
             }
-        }
-        else {
+        } else {
             followTarget();
             sleepSoundPlayed = false;
         }
 
-        fly(delta);
 
+        fly(delta);
     }
 
     private void fly(float delta) {
@@ -132,8 +133,8 @@ public class Bat extends Entity {
     }
 
     private void fall(float delta) {
-        velocity.y -= 5*delta;
-        velocity.x = 0;
+        velocity.y -= 5 * delta;
+        velocity.x *= 0.75f;
         if (getY() < 0) {
             setY(0);
             velocity.y *= -0.75f;
@@ -153,9 +154,7 @@ public class Bat extends Entity {
                 MAX_SPEED * 0.75f,
                 (50f - stamina) / 25f
             );
-        }
-
-        else if (stamina > 0) {
+        } else if (stamina > 0) {
             return MathUtils.lerp(
                 MAX_SPEED * 0.5f,
                 0f,
@@ -167,6 +166,10 @@ public class Bat extends Entity {
 
     public float getStamina() {
         return stamina;
+    }
+
+    public float getHealth() {
+        return health;
     }
 
     public void setTarget(Vector2 target) {
@@ -225,8 +228,7 @@ public class Bat extends Entity {
         if (perch != null) {
             perchTarget.set(perch);
             perchingTo = true;
-        }
-        else {
+        } else {
             perchingTo = false;
         }
     }
@@ -241,5 +243,14 @@ public class Bat extends Entity {
 
     public void resetStamina() {
         stamina = GameConfig.MAX_STAMINA;
+    }
+
+    public void hurt() {
+        health -= 25;
+        addAction(Actions.rotateBy(MathUtils.randomSign() * 360, 0.3f));
+    }
+
+    public boolean isDead() {
+        return health <= 0 || stamina <= 0;
     }
 }

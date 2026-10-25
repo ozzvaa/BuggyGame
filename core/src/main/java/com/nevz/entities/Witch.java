@@ -24,6 +24,7 @@ public class Witch extends Entity implements Pool.Poolable {
 
     private float revealHoldTimer = 0f;
     private int lastLocatePulseId = -1;
+    private boolean removeWitch = false;
 
     public Witch() {
         super(0, 0, GameConfig.WITCH_SIZE, GameConfig.WITCH_SIZE);
@@ -107,27 +108,13 @@ public class Witch extends Entity implements Pool.Poolable {
         );
     }
 
-    public void spawn(Vector2 batPosition) {
+    public void spawn(Vector2 witchPos) {
         stateTime = 0f;
-        int side = MathUtils.random(0, 1);
-        switch (side) {
-            case 0:
-                setPosition(
-                    batPosition.x - GameConfig.WORLD_WIDTH,
-                    batPosition.y - MathUtils.random(batPosition.y - GameConfig.WORLD_HEIGHT / 2, batPosition.y + GameConfig.WORLD_HEIGHT / 2));
-                direction.set(batPosition.sub(getCenter()).nor());
-                break;
-            case 1:
-                setPosition(
-                    batPosition.x + GameConfig.WORLD_WIDTH,
-                    batPosition.y - MathUtils.random(
-                        batPosition.y - GameConfig.WORLD_HEIGHT / 2f,
-                        batPosition.y + GameConfig.WORLD_HEIGHT / 2f
-                    )
-                );
-                break;
-        }
-        direction.set(batPosition).sub(getCenter()).nor();
+
+        setPosition(witchPos.x, witchPos.y);
+
+        direction.set(MathUtils.random(-1,1), MathUtils.random(-1,1)).nor();
+
     }
 
     @Override
@@ -141,10 +128,11 @@ public class Witch extends Entity implements Pool.Poolable {
         setPosition(0f, 0f);
         setScaleX(1f);
         setScaleY(1f);
+        removeWitch = false;
     }
 
     public boolean doRemove(Vector2 batPosition) {
-        return getCenter().dst2(batPosition) > GameConfig.WORLD_WIDTH * GameConfig.WORLD_WIDTH * 2;
+        return removeWitch || getCenter().dst2(batPosition) > GameConfig.WORLD_WIDTH * GameConfig.WORLD_WIDTH * 2;
     }
 
     public void revealFromLocate(int pulseId) {
@@ -165,5 +153,9 @@ public class Witch extends Entity implements Pool.Poolable {
 
     public float getNearbyAlpha() {
         return nearbyAlpha;
+    }
+
+    public void setRemoveWitch() {
+        removeWitch = true;
     }
 }

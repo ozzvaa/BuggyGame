@@ -19,7 +19,7 @@ public class GameConfig {
 
     public static final float WITCH_SIZE = 4 * UNIT;
     public static final float WITCH_SPEED = 3 * UNIT;
-    public static final float WITCH_TIMER = 3;
+    public static final float WITCH_TIMER = 2f;
 
     public static final float REVEAL_HOLD_TIME = 0.35f;
     public static final float REVEAL_HOLD_TIME_TREE = 3f;
@@ -27,7 +27,7 @@ public class GameConfig {
     public static final float REVEAL_FADE_TIME = 1.0f;
     public static final float REVEAL_FADE_TIME_TREE = 2f;
 
-    public static final float LOCATE_COOLDOWN = 2f;
+    public static final float LOCATE_COOLDOWN = 0.5f;
     public static final float LOCATE_DURATION = 1f;
     public static final float LOCATE_MAX_RANGE =
         GameConfig.WORLD_WIDTH * 0.8f;
@@ -38,7 +38,7 @@ public class GameConfig {
     public static final float PERCH_RADIUS = 2 * UNIT;
 
 
-    public static final float ATTACK_COOLDOWN = 5f;
+    public static final float ATTACK_COOLDOWN = 1f;
 
     public static final float FIREBALL_SPEED = 150f;
     public static final float FIREBALL_SIZE = 3 * UNIT;

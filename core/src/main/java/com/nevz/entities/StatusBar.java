@@ -51,7 +51,6 @@ public class StatusBar extends Entity {
             );
         }
 
-//        System.out.println(sonarAlpha);
     }
 
     public void setPercentage(float percentage) {

@@ -24,7 +24,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -173,10 +172,10 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if (button == Input.Buttons.LEFT) {
-                    if (bat.isPerchingTo()) {
+                    if (bat.isPerching()) {
                         bat.unperch();
-                        return true;
                     }
+                    return true;
                 }
                 return false;
             }
@@ -338,12 +337,14 @@ public class GameScreen extends ScreenAdapter {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if (button == Input.Buttons.LEFT) {
+                        System.out.println("Clicked");
+
                         Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
                         if (closestPoint == null) return false;
 
                         closestPoint = tree.localToStageCoordinates(closestPoint.cpy());
                         bat.perchAtPoint(closestPoint);
-
+                        return true;
                     }
                     return false;
                 }

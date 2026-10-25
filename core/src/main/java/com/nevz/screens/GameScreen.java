@@ -164,7 +164,10 @@ public class GameScreen extends ScreenAdapter {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
         handleCamera(delta);
-        gameLoop(delta);
+
+        if (!bat.isDead()) {
+            gameLoop(delta);
+        }
 
         stage.act(delta);
         stage.draw();
@@ -227,7 +230,9 @@ public class GameScreen extends ScreenAdapter {
                 }
 
                 if (keycode == Input.Keys.A) {
-                    tryAttack();
+                    if (!bat.isDead()) {
+                        tryAttack();
+                    }
                     return true;
                 }
 
@@ -249,6 +254,7 @@ public class GameScreen extends ScreenAdapter {
     }
 
     public void handleStatus() {
+        healthBar.setPercentage(bat.getHealth());
         healthBar.render(game.getShapeRenderer());
         staminaBar.setPercentage(bat.getStamina());
         staminaBar.render(game.getShapeRenderer());
@@ -290,7 +296,7 @@ public class GameScreen extends ScreenAdapter {
         handleWitches(delta);
         handleTrees();
         handleFireballCollisions();
-        revealNearby();
+        handleNearby();
 
     }
 
@@ -316,7 +322,6 @@ public class GameScreen extends ScreenAdapter {
         witchTimer = 0;
 
         int witchSpawnFactor = (Utils.getChunk(bat.getY()) + 1 ) * 2;
-        System.out.println(witchSpawnFactor);
 
         for (int i = 0; i <= witchSpawnFactor; i++) {
             spawnWithces();
@@ -578,7 +583,6 @@ public class GameScreen extends ScreenAdapter {
         for (StatusBar bar : statusBars) {
 
             Vector2 barStageCenter = bar.getStageCenter();
-            System.out.println(barStageCenter);
 
             candidateOffset.set(
                 barStageCenter.x - locateOrigin.x,
@@ -606,7 +610,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void revealNearby() {
+    private void handleNearby() {
         // Trees
         int chunkId = Utils.getChunk(bat.getCenter().x);
         for (int i = chunkId - 1; i < chunkId + 2; i++) {
@@ -635,6 +639,11 @@ public class GameScreen extends ScreenAdapter {
                 witch.getCenter(),
                 minDistance / 2f
             );
+
+            if (visibilityPercent == 1) {
+                bat.hurt();
+                witch.setRemoveWitch();
+            }
 
             witch.setNearbyAlpha(visibilityPercent);
 

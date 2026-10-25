@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.nevz.config.GameConfig;
 
 public class Bat extends Entity {
@@ -146,6 +147,10 @@ public class Bat extends Entity {
         return stamina;
     }
 
+    public float getHealth() {
+        return health;
+    }
+
     public void setTarget(Vector2 target) {
         this.target.set(target);
     }
@@ -221,6 +226,11 @@ public class Bat extends Entity {
     }
 
     public void hurt() {
-        health -= 10;
+        health -= 25 ;
+        addAction(Actions.rotateBy(MathUtils.randomSign() * 360, 0.3f));
+    }
+
+    public boolean isDead() {
+        return health <= 0 || stamina <= 0;
     }
 }

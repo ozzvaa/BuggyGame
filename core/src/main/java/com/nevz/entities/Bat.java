@@ -157,7 +157,7 @@ public class Bat extends Entity {
         } else if (stamina > 0) {
             return MathUtils.lerp(
                 MAX_SPEED * 0.5f,
-                0f,
+                MAX_SPEED * 0.25f,
                 (25f - stamina) / 25f
             );
         }

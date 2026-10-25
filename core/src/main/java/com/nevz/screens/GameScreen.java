@@ -233,7 +233,9 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.SPACE) {
-                    activateLocate();
+                    if (!bat.isDead()) {
+                        activateLocate();
+                    }
                     return true;
                 }
 

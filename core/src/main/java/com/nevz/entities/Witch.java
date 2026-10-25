@@ -20,6 +20,8 @@ public class Witch extends Entity implements Pool.Poolable {
     private float stateTime = 0f;
 
     private float sonarAlpha = 0f;
+    private float nearbyAlpha = 0f;
+
     private float revealHoldTimer = 0f;
     private int lastLocatePulseId = -1;
 
@@ -35,7 +37,7 @@ public class Witch extends Entity implements Pool.Poolable {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (animation == null || sonarAlpha <= 0f) {
+        if (animation == null || sonarAlpha <= 0f && nearbyAlpha <= 0) {
             return;
         }
 
@@ -50,11 +52,13 @@ public class Witch extends Entity implements Pool.Poolable {
 
         Color color = getColor();
 
+        float alpha = Math.max(nearbyAlpha, sonarAlpha);
+
         batch.setColor(
             color.r,
             color.g,
             color.b,
-            color.a * parentAlpha * sonarAlpha
+            color.a * parentAlpha * alpha
         );
 
         batch.draw(
@@ -153,5 +157,13 @@ public class Witch extends Entity implements Pool.Poolable {
 
         sonarAlpha = 1f;
         revealHoldTimer = REVEAL_HOLD_TIME;
+    }
+
+    public void setNearbyAlpha(float alpha) {
+        nearbyAlpha = alpha;
+    }
+
+    public float getNearbyAlpha() {
+        return nearbyAlpha;
     }
 }

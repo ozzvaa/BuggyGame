@@ -21,4 +21,13 @@ public final class Utils {
         return getChunk(position.x, position.y);
     }
 
+    public static float calculateNearbyVisibility(Vector2 pos1, Vector2 pos2, float minDistance) {
+        float dst = pos1.dst(pos2);
+
+        return Math.max(0f, Math.min(1f,
+            (minDistance + minDistance - dst ) / minDistance
+        ));
+
+    }
+
 }

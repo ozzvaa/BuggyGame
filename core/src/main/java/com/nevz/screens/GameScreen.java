@@ -304,6 +304,7 @@ public class GameScreen extends ScreenAdapter {
         handleWitches(delta);
         handleTrees();
         handleFireballCollisions();
+        handlePumpkinCollection();
         handleNearby();
 
     }
@@ -643,6 +644,7 @@ public class GameScreen extends ScreenAdapter {
             );
 
             if (visibilityPercent == 1) {
+                game.playBatHitSound();
                 bat.hurt();
                 witch.setRemoveWitch();
             }
@@ -699,6 +701,8 @@ public class GameScreen extends ScreenAdapter {
                 if (!fireball.getRect().overlaps(witch.getRect())) {
                     continue;
                 }
+
+                game.playWitchHitSound();
 
                 // shrani položaj pred vračanjem čarovnice v Pool
                 float pumpkinX =
@@ -763,6 +767,21 @@ public class GameScreen extends ScreenAdapter {
             }
 
             pumpkin.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void handlePumpkinCollection() {
+        for (int i = pumpkins.size - 1; i >= 0; i--) {
+            Pumpkin pumpkin = pumpkins.get(i);
+
+            if (!bat.getRect().overlaps(pumpkin.getRect())) {
+                continue;
+            }
+
+            game.playPumpkinCollectSound();
+
+            pumpkin.remove();
+            pumpkins.removeIndex(i);
         }
     }
 

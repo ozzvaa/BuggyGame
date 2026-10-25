@@ -1,5 +1,6 @@
 package com.nevz.entities;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -24,8 +25,12 @@ public class Bat extends Entity {
     private final Vector2 target = new Vector2();
     private final Vector2 toTarget = new Vector2(0, 0);
     private final Vector2 direction = new Vector2(1, 0);
+    private final Sound fallSound;
+    private final Sound sleepSound;
+    private boolean fallSoundPlayed = false;
+    private boolean sleepSoundPlayed = false;
 
-    public Bat(Animation<TextureRegion> animation, TextureRegion perchTexture) {
+    public Bat(Animation<TextureRegion> animation, TextureRegion perchTexture, Sound fallSound, Sound sleepSound) {
         super(
             GameConfig.WORLD_WIDTH / 2f,
             GameConfig.WORLD_HEIGHT / 2f,
@@ -35,6 +40,8 @@ public class Bat extends Entity {
 
         this.animation = animation;
         this.perchTexture = perchTexture;
+        this.fallSound = fallSound;
+        this.sleepSound = sleepSound;
 
         setOriginCenter();
         target.set(getCenter());
@@ -72,15 +79,31 @@ public class Bat extends Entity {
         stateTime += delta;
 
         if (stamina <= 0) {
+            if (!fallSoundPlayed) {
+                if (fallSound != null) {
+                    fallSound.play(0.8f);
+                }
+
+                fallSoundPlayed = true;
+            }
             fall(delta);
             return;
         }
 
         if (perchingTo) {
             followPerch();
+
+            if (isPerching() && !sleepSoundPlayed) {
+                if (sleepSound != null) {
+                    sleepSound.play(0.4f);
+                }
+
+                sleepSoundPlayed = true;
+            }
         }
         else {
             followTarget();
+            sleepSoundPlayed = false;
         }
 
         fly(delta);

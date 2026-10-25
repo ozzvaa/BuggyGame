@@ -21,6 +21,7 @@ public class BuggyGame extends Game {
     private Sound echoSound;
     private Sound attackSound;
     private Sound gameOverSound;
+    private Sound sleepSound;
     private Music ambientMusic;
 
 
@@ -36,6 +37,7 @@ public class BuggyGame extends Game {
         assetManager.load(AssetDescriptors.ATTACK_SOUND);
         assetManager.load(AssetDescriptors.AMBIENT_MUSIC);
         assetManager.load(AssetDescriptors.GAME_OVER_SOUND);
+        assetManager.load(AssetDescriptors.SLEEP_SOUND);
         assetManager.load(AssetDescriptors.BAT_SHEET);
 
         assetManager.finishLoading();
@@ -45,6 +47,7 @@ public class BuggyGame extends Game {
         gameOverSound = assetManager.get(AssetDescriptors.GAME_OVER_SOUND);
         ambientMusic = assetManager.get(AssetDescriptors.AMBIENT_MUSIC);
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);
+        sleepSound = assetManager.get(AssetDescriptors.SLEEP_SOUND);
 
         ambientMusic.setLooping(true);
         ambientMusic.setVolume(0.4f);
@@ -70,12 +73,6 @@ public class BuggyGame extends Game {
     public void playAttackSound() {
         if (attackSound != null) {
             attackSound.play(0.6f);
-        }
-    }
-
-    public void playBatFallSound() {
-        if(gameOverSound != null){
-            gameOverSound.play(0.8f);
         }
     }
 

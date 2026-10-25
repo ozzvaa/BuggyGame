@@ -1,27 +1,35 @@
 package com.nevz.entities;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.nevz.config.GameConfig;
 
 public class Bat extends Entity {
-    private final float SPEED = GameConfig.BAT_SPEED;
+    private final float MAX_SPEED = GameConfig.BAT_SPEED;
 
     private final Animation<TextureRegion> animation;
     private final TextureRegion perchTexture;
-    private boolean perchingTo = false;
-    private float stateTime = 0f;
-
     private final Vector2 velocity = new Vector2(0, 0);
-
     private final Vector2 perchTarget = new Vector2();
     private final Vector2 target = new Vector2();
     private final Vector2 toTarget = new Vector2(0, 0);
     private final Vector2 direction = new Vector2(1, 0);
+    private final Sound fallSound;
+    private final Sound sleepSound;
+    private boolean perchingTo = false;
+    private float stateTime = 0f;
+    private float health = GameConfig.MAX_HEALTH;
+    private float stamina = GameConfig.MAX_STAMINA;
+    private boolean fallSoundPlayed = false;
+    private boolean sleepSoundPlayed = false;
 
-    public Bat(Animation<TextureRegion> animation, TextureRegion perchTexture) {
+    public Bat(Animation<TextureRegion> animation, TextureRegion perchTexture, Sound fallSound, Sound sleepSound) {
         super(
             GameConfig.WORLD_WIDTH / 2f,
             GameConfig.WORLD_HEIGHT / 2f,
@@ -31,9 +39,12 @@ public class Bat extends Entity {
 
         this.animation = animation;
         this.perchTexture = perchTexture;
+        this.fallSound = fallSound;
+        this.sleepSound = sleepSound;
 
         setOriginCenter();
         target.set(getCenter());
+        setTouchable(Touchable.disabled);
     }
 
     @Override
@@ -42,7 +53,7 @@ public class Bat extends Entity {
         TextureRegion currentFrame =
             animation.getKeyFrame(stateTime);
 
-        if (isPerchingTo()) {
+        if (isPerching()) {
             currentFrame = perchTexture;
         }
 
@@ -66,17 +77,102 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
-        if (perchingTo) {
-            followPerch();
-        }
-        else {
-            followTarget();
+
+        if (stamina <= 0 || health <= 0) {
+
+            if (!fallSoundPlayed) {
+                if (fallSound != null) {
+                    fallSound.play(0.4f);
+                }
+
+                fallSoundPlayed = true;
+            }
+            fall(delta);
+            return;
         }
 
+        if (perchingTo) {
+            followPerch();
+
+            if (isPerching() && !sleepSoundPlayed) {
+                if (sleepSound != null) {
+                    sleepSound.play(0.4f);
+                }
+
+                sleepSoundPlayed = true;
+
+            }
+        } else {
+            followTarget();
+            sleepSoundPlayed = false;
+            if (sleepSound != null) {
+                sleepSound.stop();
+            }
+        }
+
+
+        fly(delta);
+    }
+
+    private void fly(float delta) {
+        float speed = calculateSpeed();
+
         moveBy(
-            velocity.x * delta * SPEED,
-            velocity.y * delta * SPEED
+            velocity.x * delta * speed,
+            velocity.y * delta * speed
         );
+
+        if (getY() < 0) {
+            setY(0);
+        }
+
+        if (isPerching()) {
+            stamina = Math.min(GameConfig.MAX_STAMINA, stamina + delta * 10f);
+
+        } else {
+            stamina -= delta;
+        }
+
+    }
+
+    private void fall(float delta) {
+        velocity.y -= 5 * delta;
+        velocity.x *= 0.75f;
+        if (getY() < 0) {
+            setY(0);
+            velocity.y *= -0.75f;
+        }
+        moveBy(
+            velocity.x * delta * MAX_SPEED,
+            velocity.y * delta * MAX_SPEED
+        );
+    }
+
+    private float calculateSpeed() {
+        if (stamina > 50) return MAX_SPEED;
+
+        if (stamina > 25) {
+            return MathUtils.lerp(
+                MAX_SPEED,
+                MAX_SPEED * 0.75f,
+                (50f - stamina) / 25f
+            );
+        } else if (stamina > 0) {
+            return MathUtils.lerp(
+                MAX_SPEED * 0.5f,
+                MAX_SPEED * 0.25f,
+                (25f - stamina) / 25f
+            );
+        }
+        return 0;
+    }
+
+    public float getStamina() {
+        return stamina;
+    }
+
+    public float getHealth() {
+        return health;
     }
 
     public void setTarget(Vector2 target) {
@@ -93,12 +189,12 @@ public class Bat extends Entity {
         }
 
         if (direction.x < 0) {
-            setScaleX(-1f);  // vodoravno zrcaljenje
+            setScaleX(-Math.abs(getScaleX()));  // vodoravno zrcaljenje
         } else if (direction.x > 0) {
-            setScaleX(1f);
+            setScaleX(Math.abs(getScaleX()));
         }
 
-        velocity.set(direction.cpy().scl(SPEED));
+        velocity.set(direction.cpy().scl(MAX_SPEED));
     }
 
     private void followPerch() {
@@ -111,12 +207,12 @@ public class Bat extends Entity {
         }
 
         if (direction.x < 0) {
-            setScaleX(-1f);  // vodoravno zrcaljenje
+            setScaleX(-Math.abs(getScaleX()));  // vodoravno zrcaljenje
         } else if (direction.x > 0) {
-            setScaleX(1f);
+            setScaleX(Math.abs(getScaleX()));
         }
 
-        velocity.set(direction.cpy().scl(SPEED));
+        velocity.set(direction.cpy().scl(MAX_SPEED));
     }
 
     public Vector2 getAimDirection(Vector2 out) {
@@ -135,17 +231,44 @@ public class Bat extends Entity {
         if (perch != null) {
             perchTarget.set(perch);
             perchingTo = true;
-        }
-        else {
+        } else {
             perchingTo = false;
         }
     }
 
-    public boolean isPerchingTo() {
+    public boolean isPerching() {
         return perchingTo && velocity.isZero();
     }
 
     public void unperch() {
         perchingTo = false;
+    }
+
+    public void setMainMenuStamina() {
+        stamina = GameConfig.MAX_STAMINA * 0.25f;
+    }
+
+    public void hurt() {
+        health -= 25;
+        addAction(Actions.rotateBy(MathUtils.randomSign() * 360, 0.3f));
+    }
+
+    public void heal() {
+        health = Math.min(health + 5, GameConfig.MAX_HEALTH);
+        addAction(Actions.sequence(
+            Actions.parallel(
+                Actions.scaleTo(1.2f, 0.7f, 0.1f),
+                Actions.rotateBy(10f, 0.1f)
+            ),
+            Actions.parallel(
+                Actions.scaleTo(0.8f, 1.1f, 0.1f),
+                Actions.rotateTo(0f, 0.1f)
+            ),
+            Actions.scaleTo(1f, 1f, 0.1f)
+        ));
+    }
+
+    public boolean isDead() {
+        return health <= 0 || stamina <= 0;
     }
 }

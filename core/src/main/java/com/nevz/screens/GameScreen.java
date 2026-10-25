@@ -1,11 +1,17 @@
 package com.nevz.screens;
 
+import static com.nevz.config.GameConfig.BUG_SIZE;
+import static com.nevz.config.GameConfig.BUG_SPAWN_TIMER;
 import static com.nevz.config.GameConfig.CHUNK_SIZE;
 import static com.nevz.config.GameConfig.LOCATE_COOLDOWN;
 import static com.nevz.config.GameConfig.LOCATE_DURATION;
 import static com.nevz.config.GameConfig.LOCATE_HALF_ANGLE;
 import static com.nevz.config.GameConfig.LOCATE_MAX_RANGE;
+import static com.nevz.config.GameConfig.RESOLUTION_HEIGHT;
+import static com.nevz.config.GameConfig.RESOLUTION_WIDTH;
+import static com.nevz.config.GameConfig.TREE_HEIGHT;
 import static com.nevz.config.GameConfig.TREE_WIDTH;
+import static com.nevz.config.GameConfig.WITCH_SIZE;
 import static com.nevz.config.GameConfig.WORLD_HEIGHT;
 import static com.nevz.config.GameConfig.WORLD_WIDTH;
 
@@ -15,25 +21,31 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.nevz.BuggyGame;
 import com.nevz.animation.BatAnimation;
 import com.nevz.animation.WitchAnimation;
@@ -42,8 +54,10 @@ import com.nevz.assets.RegionNames;
 import com.nevz.config.GameConfig;
 import com.nevz.effects.SonarEffect;
 import com.nevz.entities.Bat;
+import com.nevz.entities.Bug;
 import com.nevz.entities.Fireball;
 import com.nevz.entities.Pumpkin;
+import com.nevz.entities.StatusBar;
 import com.nevz.entities.Tree;
 import com.nevz.entities.Witch;
 import com.nevz.utils.TreesData;
@@ -59,6 +73,9 @@ public class GameScreen extends ScreenAdapter {
     private final Array<TextureRegion> pumpkinRegions = new Array<>();
     private final Array<Fireball> fireballs = new Array<>();
     private final Array<Pumpkin> pumpkins = new Array<>();
+    private final Array<Bug> bugs = new Array<>();
+    private float bugSpawnTimer = 0;
+
     private final Vector2 locateOrigin = new Vector2();
     private final Vector2 locateDirection = new Vector2(1f, 0f);
     private final Vector2 candidateOffset = new Vector2();
@@ -73,6 +90,8 @@ public class GameScreen extends ScreenAdapter {
     // Trees
     private final IntMap<Tree> chunkTrees = new IntMap<>();
     private FitViewport viewport;
+    private ScreenViewport hud;
+    private BitmapFont font = new BitmapFont();
     private OrthographicCamera camera;
     private Stage stage;
     private Animation<TextureRegion> witchAnimation;
@@ -89,7 +108,10 @@ public class GameScreen extends ScreenAdapter {
     private Bat bat;
     private Integer witchCount = 0;
     private float witchTimer = 0;
-
+    private StatusBar healthBar;
+    private StatusBar staminaBar;
+    private Array<StatusBar> statusBars = new Array<>();
+    private TextureAtlas atlas;
     public GameScreen(BuggyGame game) {
         this.game = game;
     }
@@ -100,9 +122,30 @@ public class GameScreen extends ScreenAdapter {
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
+        hud = new ScreenViewport();
+
         stage = new Stage(viewport, game.getBatch());
 
-        TextureAtlas atlas =
+        healthBar = new StatusBar(
+            10, RESOLUTION_HEIGHT - 15,
+            200, 15, Color.RED
+        );
+
+        staminaBar = new StatusBar(
+            10, RESOLUTION_HEIGHT - 15 - 10,
+            200, 10, Color.YELLOW
+        );
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        statusBars.add(healthBar);
+        statusBars.add(staminaBar);
+        stage.addActor(healthBar);
+        stage.addActor(staminaBar);
+
+
+        atlas =
             assetManager.get(AssetDescriptors.ATLAS);
 
         treeRegions.clear();
@@ -123,7 +166,13 @@ public class GameScreen extends ScreenAdapter {
 
         sonarEffect = new SonarEffect();
 
-        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
+        Sound fallSound =
+            game.getAssetManager().get(AssetDescriptors.GAME_OVER_SOUND);
+
+        Sound sleepSound =
+            game.getAssetManager().get(AssetDescriptors.SLEEP_SOUND);
+
+        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH), fallSound, sleepSound);
         bat.toFront();
 
         stage.addActor(bat);
@@ -137,25 +186,48 @@ public class GameScreen extends ScreenAdapter {
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
         handleCamera(delta);
-        gameLoop(delta);
+
+        if (!bat.isDead()) {
+            gameLoop(delta);
+
+        }
+        else {
+            hud.apply();
+            game.getBatch().setProjectionMatrix(hud.getCamera().combined);
+            game.getBatch().begin();
+            font.setColor(Color.WHITE);
+            font.getData().setScale(6);
+            font.draw(game.getBatch(), "GAME OVER!\n     Score: "+game.score, Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() - 100);
+
+            font.getData().setScale(3);
+            font.draw(game.getBatch(), "          Press - r - to retry ", Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() - 600);
+            game.getBatch().end();
+
+            viewport.apply();
+            game.getBatch().setProjectionMatrix(viewport.getCamera().combined);
+
+        }
 
         stage.act(delta);
         stage.draw();
 //        drawDebug();
+
 
         if (sonarEffect.isActive()) {
             sonarEffect.setOrigin(bat.getCenter());
         }
 
         sonarEffect.draw(camera.combined);
+        handleStatus();
     }
 
 
     @Override
     public void resize(int width, int height) {
+        hud.update(width, height, true);
         viewport.update(width, height, true);
         camera.position.set(bat.getCenter(), 0);
-//        camera.update();
+        camera.update();
     }
 
     @Override
@@ -164,6 +236,7 @@ public class GameScreen extends ScreenAdapter {
         if (sonarEffect != null) {
             sonarEffect.dispose();
         }
+        font.dispose();
     }
 
     private void setupInputs() {
@@ -173,10 +246,10 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if (button == Input.Buttons.LEFT) {
-                    if (bat.isPerchingTo()) {
+                    if (bat.isPerching()) {
                         bat.unperch();
-                        return true;
                     }
+                    return true;
                 }
                 return false;
             }
@@ -194,12 +267,23 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.SPACE) {
-                    activateLocate();
+                    if (!bat.isDead()) {
+                        activateLocate();
+                    }
                     return true;
                 }
 
                 if (keycode == Input.Keys.A) {
-                    tryAttack();
+                    if (!bat.isDead()) {
+                        tryAttack();
+                    }
+                    return true;
+                }
+
+                if (keycode == Input.Keys.R) {
+                    if (bat.isDead()) {
+                        game.setScreen(new MainMenuScreen(game));
+                    }
                     return true;
                 }
 
@@ -220,13 +304,40 @@ public class GameScreen extends ScreenAdapter {
         sr.end();
     }
 
+    public void handleStatus() {
+        healthBar.setPercentage(bat.getHealth());
+        healthBar.render(game.getShapeRenderer());
+        staminaBar.setPercentage(bat.getStamina());
+        staminaBar.render(game.getShapeRenderer());
+    }
+
     private void handleCamera(float delta) {
-        Vector3 pos = new Vector3(bat.getCenter(), 0);
-        pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
-        camera.position.lerp(
-            pos,
-            0.5f * delta
+        Vector2 screenMiddle = new Vector2(
+            Gdx.graphics.getWidth() / 2f,
+            Gdx.graphics.getHeight() / 2f
         );
+
+        Vector2 batScreen = stage.stageToScreenCoordinates(bat.getCenter());
+        Vector2 cameraToBat = batScreen.sub(screenMiddle);
+
+        float distance = cameraToBat.len();
+        float maxCameraDistance = screenMiddle.y / 4f;
+
+        if (distance > maxCameraDistance) {
+            float correction = distance - maxCameraDistance;
+            Vector2 cameraCorrection = cameraToBat.nor().scl(correction);
+
+            float smoothness = 1f - (float) Math.exp(-5f * delta);
+
+            camera.position.add(
+                cameraCorrection.x * smoothness,
+                -cameraCorrection.y * smoothness,
+                0
+            );
+        }
+
+        camera.position.y = Math.max(camera.viewportHeight / 2f, camera.position.y);
+
         camera.update();
     }
 
@@ -235,8 +346,40 @@ public class GameScreen extends ScreenAdapter {
         updateLocate(delta);
         handleWitches(delta);
         handleTrees();
+        handleBugs(delta);
         handleFireballCollisions();
-        revealNearby();
+        handlePumpkinCollection();
+        handleNearby();
+
+    }
+
+    // Bugs
+    private void handleBugs(float delta) {
+
+        if (bugSpawnTimer <= 0) {
+            spawnBug();
+            bugSpawnTimer = BUG_SPAWN_TIMER;
+        }
+        bugSpawnTimer -= delta;
+    }
+
+    private void spawnBug() {
+        // Spawn on trees
+        int chunkId = Utils.getChunk(bat.getCenter().x);
+        for (int i = chunkId - 1; i < chunkId + 1; i++) {
+            Tree nearTree = chunkTrees.get(i);
+
+            if (nearTree == null) {
+                return;
+            }
+
+            for (int j = 0; j < MathUtils.random(0, 5); j++) {
+                Bug bug = new Bug(nearTree.getCenterX(), MathUtils.random(0, nearTree.getHeight()), BUG_SIZE, BUG_SIZE, atlas.findRegion(RegionNames.BUG));
+                bugs.add(bug);
+                stage.addActor(bug);
+            }
+
+        }
 
     }
 
@@ -260,9 +403,13 @@ public class GameScreen extends ScreenAdapter {
         }
 
         witchTimer = 0;
-        spawnWithces();
 
+        int witchSpawnFactor = (Utils.getChunk(bat.getY()) + 1 ) * 2;
 
+        for (int i = 0; i <= witchSpawnFactor; i++) {
+            spawnWithces();
+
+        }
     }
 
     private void spawnWithces() {
@@ -270,7 +417,34 @@ public class GameScreen extends ScreenAdapter {
 
         Witch witch = witchPool.obtain();
         witch.setAnimation(witchAnimation);
-        witch.spawn(bat.getCenter());
+
+        // Random position off screen
+        int side = MathUtils.random(0, 2);
+
+        Vector2 screenPos = new Vector2(0, 0);
+
+        float offset = (RESOLUTION_WIDTH / WORLD_WIDTH ) * WITCH_SIZE;
+
+        switch (side) {
+            case 0: // Left
+                screenPos.set(-offset, MathUtils.random(0, RESOLUTION_HEIGHT));
+                break;
+            case 1: // Up
+                screenPos.set(MathUtils.random(0, RESOLUTION_WIDTH), -offset);
+                break;
+            case 2: // Right
+                screenPos.set(RESOLUTION_WIDTH + offset, MathUtils.random(0, RESOLUTION_HEIGHT));
+                break;
+        }
+
+
+        Vector2 worldPos = stage.screenToStageCoordinates(screenPos);
+        if (worldPos.y < TREE_HEIGHT) {
+            return;
+        }
+
+        witch.spawn(worldPos);
+
         stage.addActor(witch);
         witches.add(witch);
         witchCount++;
@@ -285,7 +459,6 @@ public class GameScreen extends ScreenAdapter {
         for (int i = chunk - chunk_span; i < chunk + chunk_span; i++) {
             if (!chunkTrees.containsKey(i)) {
                 spawnTree(i);
-                bat.toFront();
             }
         }
     }
@@ -318,12 +491,13 @@ public class GameScreen extends ScreenAdapter {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if (button == Input.Buttons.LEFT) {
+
                         Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
                         if (closestPoint == null) return false;
 
                         closestPoint = tree.localToStageCoordinates(closestPoint.cpy());
                         bat.perchAtPoint(closestPoint);
-
+                        return true;
                     }
                     return false;
                 }
@@ -331,6 +505,7 @@ public class GameScreen extends ScreenAdapter {
 
             chunkTrees.put(chunkId, tree);
             stage.addActor(tree);
+            tree.toBack();
         } else {
             chunkTrees.put(chunkId, null);
         }
@@ -352,6 +527,7 @@ public class GameScreen extends ScreenAdapter {
         if (locateCooldownTimer > 0f || locateActive) {
             return;
         }
+        game.playEchoSound();
 
         locateActive = true;
         locateElapsed = 0f;
@@ -397,6 +573,8 @@ public class GameScreen extends ScreenAdapter {
         revealWitchesReachedByPulse();
         revealTreesReachedByPulse();
         revealPumpkinsReachedByPulse();
+        revealBugsReachedByPulse();
+        revealStatusBarReachedByPulse();
 
         if (progress >= 1f) {
             locateActive = false;
@@ -479,7 +657,39 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void revealNearby() {
+    private void revealStatusBarReachedByPulse() {
+        float earlyTriggerBonus = 1.3f; // val prej pride do njega
+        float rangeSquared = (locateCurrentRange * earlyTriggerBonus) * (locateCurrentRange * earlyTriggerBonus);
+        float minDot = MathUtils.cosDeg(LOCATE_HALF_ANGLE);
+
+        for (StatusBar bar : statusBars) {
+
+            Vector2 barStageCenter = bar.getStageCenter();
+
+            candidateOffset.set(
+                barStageCenter.x - locateOrigin.x,
+                barStageCenter.y - locateOrigin.y
+            );
+
+            float distanceSquared = candidateOffset.len2();
+
+            if (distanceSquared > rangeSquared) {
+                continue;
+            }
+
+            if (distanceSquared > 0.0001f) {
+                candidateOffset.nor();
+
+                if (candidateOffset.dot(locateDirection) < minDot) {
+                    continue;
+                }
+            }
+
+            bar.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void handleNearby() {
         // Trees
         int chunkId = Utils.getChunk(bat.getCenter().x);
         for (int i = chunkId - 1; i < chunkId + 2; i++) {
@@ -498,6 +708,7 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+        // Witches
         for (Witch witch : witches) {
             if (witch.getNearbyAlpha() <= 0 && (witch.getCenter().dst2(bat.getCenter()) > witch.getHeight() * witch.getHeight() * 5))
                 continue; // Optimisation to not check every witch every time
@@ -509,7 +720,38 @@ public class GameScreen extends ScreenAdapter {
                 minDistance / 2f
             );
 
+            if (visibilityPercent == 1) {
+                game.playBatHitSound();
+                bat.hurt();
+                witch.setRemoveWitch();
+            }
+
             witch.setNearbyAlpha(visibilityPercent);
+
+        }
+
+        // Bugs
+        for (int i = bugs.size-1; i >= 0; i--) {
+            Bug bug = bugs.get(i);
+
+            if (bug.getNearbyAlpha() <= 0 && (bug.getCenter().dst2(bat.getCenter()) > bug.getHeight() * bug.getHeight() * 50))
+                continue; // Optimisation to not check every witch every time
+
+            float minDistance = bug.getWidth() * 3f;
+            float visibilityPercent = Utils.calculateNearbyVisibility(
+                bat.getCenter(),
+                bug.getCenter(),
+                minDistance / 2f
+            );
+
+            if (visibilityPercent == 1) {
+                game.playBatEatSound();
+                bat.heal();
+                bug.remove();
+                bugs.removeIndex(i);
+            }
+
+            bug.setNearbyAlpha(visibilityPercent);
 
         }
     }
@@ -518,6 +760,7 @@ public class GameScreen extends ScreenAdapter {
         if (attackCooldownTimer > 0f) {
             return;
         }
+        game.playAttackSound();
 
         Vector2 direction = bat.getAimDirection(new Vector2());
         Vector2 center = bat.getCenter();
@@ -561,6 +804,8 @@ public class GameScreen extends ScreenAdapter {
                     continue;
                 }
 
+                game.playWitchHitSound();
+
                 // shrani položaj pred vračanjem čarovnice v Pool
                 float pumpkinX =
                     witch.getCenterX() - GameConfig.PUMPKIN_WIDTH / 2f;
@@ -596,6 +841,37 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
+    private void revealBugsReachedByPulse() {
+        float rangeSquared =
+            locateCurrentRange * locateCurrentRange;
+
+        float minDot =
+            MathUtils.cosDeg(LOCATE_HALF_ANGLE);
+
+        for (Bug bug : bugs) {
+            candidateOffset.set(
+                bug.getCenterX() - locateOrigin.x,
+                bug.getCenterY() - locateOrigin.y
+            );
+
+            float distanceSquared = candidateOffset.len2();
+
+            if (distanceSquared > rangeSquared) {
+                continue;
+            }
+
+            if (distanceSquared > 0.0001f) {
+                candidateOffset.nor();
+
+                if (candidateOffset.dot(locateDirection) < minDot) {
+                    continue;
+                }
+            }
+
+            bug.revealFromLocate(locatePulseId);
+        }
+    }
+
     private void revealPumpkinsReachedByPulse() {
         float rangeSquared =
             locateCurrentRange * locateCurrentRange;
@@ -624,6 +900,23 @@ public class GameScreen extends ScreenAdapter {
             }
 
             pumpkin.revealFromLocate(locatePulseId);
+        }
+    }
+
+    private void handlePumpkinCollection() {
+        for (int i = pumpkins.size - 1; i >= 0; i--) {
+            Pumpkin pumpkin = pumpkins.get(i);
+
+            if (!bat.getRect().overlaps(pumpkin.getRect())) {
+                continue;
+            }
+
+            game.playPumpkinCollectSound();
+
+            game.score++;
+
+            pumpkin.remove();
+            pumpkins.removeIndex(i);
         }
     }
 

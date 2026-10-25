@@ -11,6 +11,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -85,7 +86,13 @@ public class TreeScreen extends ScreenAdapter {
         Animation<TextureRegion> batAnimation =
             BatAnimation.createBatAnimation(batSheet);
 
-        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH));
+        Sound fallSound =
+            game.getAssetManager().get(AssetDescriptors.GAME_OVER_SOUND);
+
+        Sound sleepSound =
+            game.getAssetManager().get(AssetDescriptors.SLEEP_SOUND);
+
+        bat = new Bat(batAnimation, atlas.findRegion(RegionNames.BAT_PERCH), fallSound, sleepSound);
         stage.addActor(bat);
 
         stage.setDebugAll(true);

@@ -20,10 +20,9 @@ public class BuggyGame extends Game {
     private TextureAtlas gameAtlas;
     private Sound echoSound;
     private Sound attackSound;
-    private Sound gameOverSound;
-    private Sound sleepSound;
-    private Music ambientMusic;
-
+    private Sound witchHitSound;
+    private Sound batHitSound;
+    private Sound pumpkinCollectSound;
 
     @Override
     public void create() {
@@ -39,15 +38,21 @@ public class BuggyGame extends Game {
         assetManager.load(AssetDescriptors.GAME_OVER_SOUND);
         assetManager.load(AssetDescriptors.SLEEP_SOUND);
         assetManager.load(AssetDescriptors.BAT_SHEET);
+        assetManager.load(AssetDescriptors.WITCH_HIT);
+        assetManager.load(AssetDescriptors.BAT_HIT);
+        assetManager.load(AssetDescriptors.PUMPKIN_COLLECT);
 
         assetManager.finishLoading();
 
         echoSound = assetManager.get(AssetDescriptors.ECHO_SOUND);
         attackSound = assetManager.get(AssetDescriptors.ATTACK_SOUND);
-        gameOverSound = assetManager.get(AssetDescriptors.GAME_OVER_SOUND);
-        ambientMusic = assetManager.get(AssetDescriptors.AMBIENT_MUSIC);
+        Sound gameOverSound = assetManager.get(AssetDescriptors.GAME_OVER_SOUND);
+        Music ambientMusic = assetManager.get(AssetDescriptors.AMBIENT_MUSIC);
         gameAtlas = assetManager.get(AssetDescriptors.ATLAS);
-        sleepSound = assetManager.get(AssetDescriptors.SLEEP_SOUND);
+        Sound sleepSound = assetManager.get(AssetDescriptors.SLEEP_SOUND);
+        witchHitSound = assetManager.get(AssetDescriptors.WITCH_HIT);
+        batHitSound = assetManager.get(AssetDescriptors.BAT_HIT);
+        pumpkinCollectSound = assetManager.get(AssetDescriptors.PUMPKIN_COLLECT);
 
         ambientMusic.setLooping(true);
         ambientMusic.setVolume(0.4f);
@@ -73,6 +78,24 @@ public class BuggyGame extends Game {
     public void playAttackSound() {
         if (attackSound != null) {
             attackSound.play(0.6f);
+        }
+    }
+
+    public void playWitchHitSound() {
+        if (witchHitSound != null) {
+            witchHitSound.play(0.5f);
+        }
+    }
+
+    public void playBatHitSound() {
+        if (batHitSound != null) {
+            batHitSound.play(0.5f);
+        }
+    }
+
+    public void playPumpkinCollectSound() {
+        if (pumpkinCollectSound != null) {
+            pumpkinCollectSound.play(1f);
         }
     }
 

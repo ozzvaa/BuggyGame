@@ -278,7 +278,7 @@ public class GameScreen extends ScreenAdapter {
         Vector2 cameraToBat = batScreen.sub(screenMiddle);
 
         float distance = cameraToBat.len();
-        float maxCameraDistance = screenMiddle.y / 2f;
+        float maxCameraDistance = screenMiddle.y / 4f;
 
         if (distance > maxCameraDistance) {
             float correction = distance - maxCameraDistance;

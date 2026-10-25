@@ -71,7 +71,7 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
-        if (stamina <= 0) {
+        if (stamina <= 0 || health <= 0) {
             fall(delta);
             return;
         }
@@ -110,7 +110,7 @@ public class Bat extends Entity {
 
     private void fall(float delta) {
         velocity.y -= 5*delta;
-        velocity.x = 0;
+        velocity.x *= 0.75f;
         if (getY() < 0) {
             setY(0);
             velocity.y *= -0.75f;
@@ -218,5 +218,9 @@ public class Bat extends Entity {
 
     public void resetStamina() {
         stamina = GameConfig.MAX_STAMINA;
+    }
+
+    public void hurt() {
+        health -= 10;
     }
 }

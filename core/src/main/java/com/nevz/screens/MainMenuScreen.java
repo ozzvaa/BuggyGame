@@ -177,7 +177,6 @@ public class MainMenuScreen extends ScreenAdapter {
                 Actions.scaleTo(1, 1, 2f),
                 Actions.run(() -> {
                     game.setScreen(new GameScreen(game));
-                    dispose();
                 })
             ));
 

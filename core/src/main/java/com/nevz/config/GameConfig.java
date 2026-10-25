@@ -47,4 +47,8 @@ public class GameConfig {
     public static final float PUMPKIN_WIDTH = 2 * UNIT;
     public static final float PUMPKIN_HEIGHT = 2 * UNIT;
     public static final float PUMPKIN_GRAVITY = 100f;
+
+    public static final float BUG_SIZE = 1 * UNIT;
+    public static final float BUG_SPEED = 5 * UNIT;
+    public static final float BUG_SPAWN_TIMER = 5;
 }

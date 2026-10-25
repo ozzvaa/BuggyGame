@@ -8,6 +8,7 @@ public class RegionNames {
     public static final String FIREBALL = "fireball";
     public static final String PUMPKIN = "pumpkin";
     public static final String START_BUTTON = "Start_button";
+    public static final String BUG = "bug";
 
     private RegionNames() {
     }

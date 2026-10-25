@@ -250,6 +250,21 @@ public class Bat extends Entity {
         addAction(Actions.rotateBy(MathUtils.randomSign() * 360, 0.3f));
     }
 
+    public void heal() {
+        health = Math.min(health + 5, GameConfig.MAX_HEALTH);
+        addAction(Actions.sequence(
+            Actions.parallel(
+                Actions.scaleTo(1.2f, 0.7f, 0.1f),
+                Actions.rotateBy(10f, 0.1f)
+            ),
+            Actions.parallel(
+                Actions.scaleTo(0.8f, 1.1f, 0.1f),
+                Actions.rotateTo(0f, 0.1f)
+            ),
+            Actions.scaleTo(1f, 1f, 0.1f)
+        ));
+    }
+
     public boolean isDead() {
         return health <= 0 || stamina <= 0;
     }

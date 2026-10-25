@@ -251,14 +251,14 @@ Tree
   index: 17
 Tree
   rotate: false
-  xy: 1908, 355
+  xy: 1272, 40
   size: 44, 61
   orig: 44, 61
   offset: 0, 0
   index: 1
 Tree
   rotate: false
-  xy: 1272, 40
+  xy: 1463, 349
   size: 44, 61
   orig: 44, 61
   offset: 0, 0
@@ -277,6 +277,13 @@ bat_perch
   orig: 64, 64
   offset: 0, 0
   index: -1
+bug
+  rotate: false
+  xy: 1074, 37
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 fireball
   rotate: false
   xy: 101, 29
@@ -286,7 +293,7 @@ fireball
   index: -1
 pumpkin
   rotate: false
-  xy: 1954, 394
+  xy: 1463, 325
   size: 22, 22
   orig: 22, 22
   offset: 0, 0
@@ -300,49 +307,49 @@ pumpkin
   index: 3
 pumpkin
   rotate: false
-  xy: 1954, 373
+  xy: 1487, 328
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 4
 pumpkin
   rotate: false
-  xy: 1954, 352
+  xy: 1509, 393
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
   index: 5
 pumpkin
   rotate: false
-  xy: 133, 25
+  xy: 1509, 372
   size: 19, 19
   orig: 19, 19
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 1074, 37
+  xy: 1140, 37
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 0
 witch
   rotate: false
-  xy: 1140, 37
+  xy: 1206, 37
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 1
 witch
   rotate: false
-  xy: 1206, 37
+  xy: 1759, 352
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: 2
 witch
   rotate: false
-  xy: 1759, 352
+  xy: 1908, 352
   size: 64, 64
   orig: 64, 64
   offset: 0, 0

@@ -7,8 +7,11 @@ import static com.nevz.config.GameConfig.LOCATE_COOLDOWN;
 import static com.nevz.config.GameConfig.LOCATE_DURATION;
 import static com.nevz.config.GameConfig.LOCATE_HALF_ANGLE;
 import static com.nevz.config.GameConfig.LOCATE_MAX_RANGE;
+import static com.nevz.config.GameConfig.RESOLUTION_HEIGHT;
+import static com.nevz.config.GameConfig.RESOLUTION_WIDTH;
 import static com.nevz.config.GameConfig.TREE_HEIGHT;
 import static com.nevz.config.GameConfig.TREE_WIDTH;
+import static com.nevz.config.GameConfig.WITCH_SIZE;
 import static com.nevz.config.GameConfig.WORLD_HEIGHT;
 import static com.nevz.config.GameConfig.WORLD_WIDTH;
 
@@ -120,13 +123,13 @@ public class GameScreen extends ScreenAdapter {
         stage = new Stage(viewport, game.getBatch());
 
         healthBar = new StatusBar(
-            10, 450,
-            120, 15, Color.RED
+            10, RESOLUTION_HEIGHT - 15,
+            200, 15, Color.RED
         );
 
         staminaBar = new StatusBar(
-            10, 435,
-            120, 10, Color.YELLOW
+            10, RESOLUTION_HEIGHT - 15 - 10,
+            200, 10, Color.YELLOW
         );
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -390,16 +393,17 @@ public class GameScreen extends ScreenAdapter {
 
         Vector2 screenPos = new Vector2(0, 0);
 
+        float offset = (RESOLUTION_WIDTH / WORLD_WIDTH ) * WITCH_SIZE;
 
         switch (side) {
             case 0: // Left
-                screenPos.set(-64, MathUtils.random(0, 480));
+                screenPos.set(-offset, MathUtils.random(0, RESOLUTION_HEIGHT));
                 break;
             case 1: // Up
-                screenPos.set(MathUtils.random(0, 640), -64);
+                screenPos.set(MathUtils.random(0, RESOLUTION_WIDTH), -offset);
                 break;
             case 2: // Right
-                screenPos.set(640 + 64, MathUtils.random(0, 480));
+                screenPos.set(RESOLUTION_WIDTH + offset, MathUtils.random(0, RESOLUTION_HEIGHT));
                 break;
         }
 

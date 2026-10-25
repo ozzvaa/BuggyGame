@@ -3,6 +3,7 @@ package com.nevz.lwjgl3;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.nevz.BuggyGame;
+import com.nevz.config.GameConfig;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -20,7 +21,7 @@ public class Lwjgl3Launcher {
         configuration.setTitle("BuggyGame");
         configuration.useVsync(true);
         configuration.setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate + 1);
-        configuration.setWindowedMode(1920, 1024);
+        configuration.setWindowedMode(GameConfig.RESOLUTION_WIDTH, GameConfig.RESOLUTION_HEIGHT);
         configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
         return configuration;
     }

@@ -2,6 +2,8 @@ package com.nevz.config;
 
 public class GameConfig {
     public static final float UNIT = 1;
+    public static final int RESOLUTION_WIDTH = 1920;
+    public static final int RESOLUTION_HEIGHT = 1080;
     public static final float WORLD_WIDTH = 80;
     public static final float WORLD_HEIGHT = 40;
 

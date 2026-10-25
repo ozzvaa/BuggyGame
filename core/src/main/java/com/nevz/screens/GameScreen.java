@@ -24,7 +24,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -155,7 +154,7 @@ public class GameScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         viewport.update(width, height, true);
         camera.position.set(bat.getCenter(), 0);
-//        camera.update();
+        camera.update();
     }
 
     @Override
@@ -173,10 +172,10 @@ public class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 if (button == Input.Buttons.LEFT) {
-                    if (bat.isPerchingTo()) {
+                    if (bat.isPerching()) {
                         bat.unperch();
-                        return true;
                     }
+                    return true;
                 }
                 return false;
             }
@@ -221,12 +220,32 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void handleCamera(float delta) {
-        Vector3 pos = new Vector3(bat.getCenter(), 0);
-        pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
-        camera.position.lerp(
-            pos,
-            0.5f * delta
+        Vector2 screenMiddle = new Vector2(
+            Gdx.graphics.getWidth() / 2f,
+            Gdx.graphics.getHeight() / 2f
         );
+
+        Vector2 batScreen = stage.stageToScreenCoordinates(bat.getCenter());
+        Vector2 cameraToBat = batScreen.sub(screenMiddle);
+
+        float distance = cameraToBat.len();
+        float maxCameraDistance = screenMiddle.y / 2f;
+
+        if (distance > maxCameraDistance) {
+            float correction = distance - maxCameraDistance;
+            Vector2 cameraCorrection = cameraToBat.nor().scl(correction);
+
+            float smoothness = 1f - (float) Math.exp(-5f * delta);
+
+            camera.position.add(
+                cameraCorrection.x * smoothness,
+                -cameraCorrection.y * smoothness,
+                0
+            );
+        }
+
+        camera.position.y = Math.max(camera.viewportHeight / 2f, camera.position.y);
+
         camera.update();
     }
 
@@ -318,12 +337,14 @@ public class GameScreen extends ScreenAdapter {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     if (button == Input.Buttons.LEFT) {
+                        System.out.println("Clicked");
+
                         Vector2 closestPoint = tree.getClosestPerchPoint(new Vector2(x, y));
                         if (closestPoint == null) return false;
 
                         closestPoint = tree.localToStageCoordinates(closestPoint.cpy());
                         bat.perchAtPoint(closestPoint);
-
+                        return true;
                     }
                     return false;
                 }

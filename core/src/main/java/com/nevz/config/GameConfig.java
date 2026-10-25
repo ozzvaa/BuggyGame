@@ -12,7 +12,10 @@ public class GameConfig {
         (int) Math.ceil(WORLD_HEIGHT / CHUNK_SIZE);
 
     public static final float BAT_SIZE = 8 * UNIT;
-    public static final float BAT_SPEED = 3 * UNIT;
+    public static final float BAT_SPEED = 5 * UNIT;
+    public static final float MAX_STAMINA = 100;
+    public static final float MAX_HEALTH = 100;
+
 
     public static final float WITCH_SIZE = 4 * UNIT;
     public static final float WITCH_SPEED = 3 * UNIT;

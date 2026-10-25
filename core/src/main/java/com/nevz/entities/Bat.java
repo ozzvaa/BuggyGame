@@ -3,16 +3,20 @@ package com.nevz.entities;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.nevz.config.GameConfig;
 
 public class Bat extends Entity {
-    private final float SPEED = GameConfig.BAT_SPEED;
+    private final float MAX_SPEED = GameConfig.BAT_SPEED;
 
     private final Animation<TextureRegion> animation;
     private final TextureRegion perchTexture;
     private boolean perchingTo = false;
     private float stateTime = 0f;
+    private float health = GameConfig.MAX_HEALTH;
+    private float stamina = GameConfig.MAX_STAMINA;
 
     private final Vector2 velocity = new Vector2(0, 0);
 
@@ -34,6 +38,7 @@ public class Bat extends Entity {
 
         setOriginCenter();
         target.set(getCenter());
+        setTouchable(Touchable.disabled);
     }
 
     @Override
@@ -42,7 +47,7 @@ public class Bat extends Entity {
         TextureRegion currentFrame =
             animation.getKeyFrame(stateTime);
 
-        if (isPerchingTo()) {
+        if (isPerching()) {
             currentFrame = perchTexture;
         }
 
@@ -66,6 +71,11 @@ public class Bat extends Entity {
 
         stateTime += delta;
 
+        if (stamina <= 0) {
+            fall(delta);
+            return;
+        }
+
         if (perchingTo) {
             followPerch();
         }
@@ -73,10 +83,63 @@ public class Bat extends Entity {
             followTarget();
         }
 
+        fly(delta);
+
+    }
+
+    private void fly(float delta) {
+        float speed = calculateSpeed();
+
         moveBy(
-            velocity.x * delta * SPEED,
-            velocity.y * delta * SPEED
+            velocity.x * delta * speed,
+            velocity.y * delta * speed
         );
+
+        if (getY() < 0) {
+            setY(0);
+        }
+
+        if (isPerching()) {
+            stamina = Math.min(GameConfig.MAX_STAMINA, stamina + delta * 10f);
+
+        } else {
+            stamina -= delta * 10;
+        }
+
+    }
+
+    private void fall(float delta) {
+        velocity.y -= 5*delta;
+        velocity.x = 0;
+        if (getY() < 0) {
+            setY(0);
+            velocity.y *= -0.75f;
+        }
+        moveBy(
+            velocity.x * delta * MAX_SPEED,
+            velocity.y * delta * MAX_SPEED
+        );
+    }
+
+    private float calculateSpeed() {
+        if (stamina > 50) return MAX_SPEED;
+
+        if (stamina > 25) {
+            return MathUtils.lerp(
+                MAX_SPEED,
+                MAX_SPEED * 0.75f,
+                (50f - stamina) / 25f
+            );
+        }
+
+        else if (stamina > 0) {
+            return MathUtils.lerp(
+                MAX_SPEED * 0.5f,
+                0f,
+                (25f - stamina) / 25f
+            );
+        }
+        return 0;
     }
 
     public void setTarget(Vector2 target) {
@@ -98,7 +161,7 @@ public class Bat extends Entity {
             setScaleX(1f);
         }
 
-        velocity.set(direction.cpy().scl(SPEED));
+        velocity.set(direction.cpy().scl(MAX_SPEED));
     }
 
     private void followPerch() {
@@ -116,7 +179,7 @@ public class Bat extends Entity {
             setScaleX(1f);
         }
 
-        velocity.set(direction.cpy().scl(SPEED));
+        velocity.set(direction.cpy().scl(MAX_SPEED));
     }
 
     public Vector2 getAimDirection(Vector2 out) {
@@ -141,7 +204,7 @@ public class Bat extends Entity {
         }
     }
 
-    public boolean isPerchingTo() {
+    public boolean isPerching() {
         return perchingTo && velocity.isZero();
     }
 

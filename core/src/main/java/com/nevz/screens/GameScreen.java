@@ -711,10 +711,10 @@ public class GameScreen extends ScreenAdapter {
             );
 
             if (visibilityPercent == 1) {
+                game.playBatEatSound();
                 bat.heal();
                 bug.remove();
                 bugs.removeIndex(i);
-                System.out.println("NAJM");
             }
 
             bug.setNearbyAlpha(visibilityPercent);

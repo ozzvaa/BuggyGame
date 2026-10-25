@@ -23,6 +23,7 @@ public class BuggyGame extends Game {
     private Sound witchHitSound;
     private Sound batHitSound;
     private Sound pumpkinCollectSound;
+    private Sound batEatSound;
 
     @Override
     public void create() {
@@ -40,6 +41,7 @@ public class BuggyGame extends Game {
         assetManager.load(AssetDescriptors.BAT_SHEET);
         assetManager.load(AssetDescriptors.WITCH_HIT);
         assetManager.load(AssetDescriptors.BAT_HIT);
+        assetManager.load(AssetDescriptors.BAT_EAT);
         assetManager.load(AssetDescriptors.PUMPKIN_COLLECT);
 
         assetManager.finishLoading();
@@ -52,6 +54,7 @@ public class BuggyGame extends Game {
         Sound sleepSound = assetManager.get(AssetDescriptors.SLEEP_SOUND);
         witchHitSound = assetManager.get(AssetDescriptors.WITCH_HIT);
         batHitSound = assetManager.get(AssetDescriptors.BAT_HIT);
+        batEatSound = assetManager.get(AssetDescriptors.BAT_EAT);
         pumpkinCollectSound = assetManager.get(AssetDescriptors.PUMPKIN_COLLECT);
 
         ambientMusic.setLooping(true);
@@ -90,6 +93,12 @@ public class BuggyGame extends Game {
     public void playBatHitSound() {
         if (batHitSound != null) {
             batHitSound.play(0.5f);
+        }
+    }
+
+    public void playBatEatSound() {
+        if (batEatSound != null) {
+            batEatSound.play(0.5f);
         }
     }
 

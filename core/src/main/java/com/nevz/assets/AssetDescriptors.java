@@ -35,6 +35,9 @@ public class AssetDescriptors {
     public static final AssetDescriptor<Sound> BAT_HIT =
         new AssetDescriptor<>("audio/bat_hit.mp3", Sound.class);
 
+    public static final AssetDescriptor<Sound> BAT_EAT =
+        new AssetDescriptor<>("audio/eat_sfx.mp3", Sound.class);
+
     public static final AssetDescriptor<Sound> WITCH_HIT =
         new AssetDescriptor<>("audio/witch_hit.mp3", Sound.class);
 

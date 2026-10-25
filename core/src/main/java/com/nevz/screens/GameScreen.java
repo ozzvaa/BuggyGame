@@ -155,7 +155,7 @@ public class GameScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         viewport.update(width, height, true);
         camera.position.set(bat.getCenter(), 0);
-//        camera.update();
+        camera.update();
     }
 
     @Override
@@ -221,12 +221,32 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void handleCamera(float delta) {
-        Vector3 pos = new Vector3(bat.getCenter(), 0);
-        pos.y = Math.max(WORLD_HEIGHT / 2f - 1f, pos.y);
-        camera.position.lerp(
-            pos,
-            0.5f * delta
+        Vector2 screenMiddle = new Vector2(
+            Gdx.graphics.getWidth() / 2f,
+            Gdx.graphics.getHeight() / 2f
         );
+
+        Vector2 batScreen = stage.stageToScreenCoordinates(bat.getCenter());
+        Vector2 cameraToBat = batScreen.sub(screenMiddle);
+
+        float distance = cameraToBat.len();
+        float maxCameraDistance = screenMiddle.y / 2f;
+
+        if (distance > maxCameraDistance) {
+            float correction = distance - maxCameraDistance;
+            Vector2 cameraCorrection = cameraToBat.nor().scl(correction);
+
+            float smoothness = 1f - (float) Math.exp(-5f * delta);
+
+            camera.position.add(
+                cameraCorrection.x * smoothness,
+                -cameraCorrection.y * smoothness,
+                0
+            );
+        }
+
+        camera.position.y = Math.max(camera.viewportHeight / 2f, camera.position.y);
+
         camera.update();
     }
 

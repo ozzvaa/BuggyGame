@@ -24,6 +24,7 @@ public class BuggyGame extends Game {
     private Sound batHitSound;
     private Sound pumpkinCollectSound;
     private Sound batEatSound;
+    public int score = 0;
 
     @Override
     public void create() {

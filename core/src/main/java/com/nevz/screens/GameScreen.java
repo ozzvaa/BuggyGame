@@ -28,6 +28,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -43,6 +45,7 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.nevz.BuggyGame;
 import com.nevz.animation.BatAnimation;
 import com.nevz.animation.WitchAnimation;
@@ -87,6 +90,8 @@ public class GameScreen extends ScreenAdapter {
     // Trees
     private final IntMap<Tree> chunkTrees = new IntMap<>();
     private FitViewport viewport;
+    private ScreenViewport hud;
+    private BitmapFont font = new BitmapFont();
     private OrthographicCamera camera;
     private Stage stage;
     private Animation<TextureRegion> witchAnimation;
@@ -107,9 +112,6 @@ public class GameScreen extends ScreenAdapter {
     private StatusBar staminaBar;
     private Array<StatusBar> statusBars = new Array<>();
     private TextureAtlas atlas;
-
-    private int score = 0;
-
     public GameScreen(BuggyGame game) {
         this.game = game;
     }
@@ -120,6 +122,8 @@ public class GameScreen extends ScreenAdapter {
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
+        hud = new ScreenViewport();
+
         stage = new Stage(viewport, game.getBatch());
 
         healthBar = new StatusBar(
@@ -185,6 +189,23 @@ public class GameScreen extends ScreenAdapter {
 
         if (!bat.isDead()) {
             gameLoop(delta);
+
+        }
+        else {
+            hud.apply();
+            game.getBatch().setProjectionMatrix(hud.getCamera().combined);
+            game.getBatch().begin();
+            font.setColor(Color.WHITE);
+            font.getData().setScale(6);
+            font.draw(game.getBatch(), "GAME OVER!\n     Score: "+game.score, Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() - 100);
+
+            font.getData().setScale(3);
+            font.draw(game.getBatch(), "          Press - r - to retry ", Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() - 600);
+            game.getBatch().end();
+
+            viewport.apply();
+            game.getBatch().setProjectionMatrix(viewport.getCamera().combined);
+
         }
 
         stage.act(delta);
@@ -203,6 +224,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void resize(int width, int height) {
+        hud.update(width, height, true);
         viewport.update(width, height, true);
         camera.position.set(bat.getCenter(), 0);
         camera.update();
@@ -214,6 +236,7 @@ public class GameScreen extends ScreenAdapter {
         if (sonarEffect != null) {
             sonarEffect.dispose();
         }
+        font.dispose();
     }
 
     private void setupInputs() {
@@ -253,6 +276,13 @@ public class GameScreen extends ScreenAdapter {
                 if (keycode == Input.Keys.A) {
                     if (!bat.isDead()) {
                         tryAttack();
+                    }
+                    return true;
+                }
+
+                if (keycode == Input.Keys.R) {
+                    if (bat.isDead()) {
+                        game.setScreen(new MainMenuScreen(game));
                     }
                     return true;
                 }
@@ -883,7 +913,7 @@ public class GameScreen extends ScreenAdapter {
 
             game.playPumpkinCollectSound();
 
-            score++;
+            game.score++;
 
             pumpkin.remove();
             pumpkins.removeIndex(i);

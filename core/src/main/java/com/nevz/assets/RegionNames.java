@@ -9,6 +9,7 @@ public class RegionNames {
     public static final String PUMPKIN = "pumpkin";
     public static final String START_BUTTON = "Start_button";
     public static final String BUG = "bug";
+    public static final String GAME_OVER = "game_over";
 
     private RegionNames() {
     }

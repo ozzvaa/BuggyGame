@@ -1,3 +1,53 @@
+# BAT BOY!!
+“Težko dojemaš svet okrog sebe, ko si bad Bat Boy!”
+
+## Ime ekipe: Nevž
+
+## Člani in vloge:
+• Matevž Ozvatič (AKA OZVA) (the “vž” in “Nevž”): Programiranje in oblikovanje in zvok
+• Nela Copot (AKA COPOY) (the “Ne” in “Nevž”): Programiranje in zvok in oblikovanje
+
+## Povzetek koncepta:
+- **Cilj igre**: Se naučiti več, ko vidiš manj
+- **Glavna igralna mehanika**: Sistem biosonarja, ki ga netopirji uporabljajo za orientacijo v
+  prostoru, izogibanje oviram in lov na plen v temi.
+- **Kje se skriva tema**?
+  **Halloween**: Netopirji, ki jih poškudujejo čarovnice, ki letijo na metlah, le-te pa ob zadetku
+  spustijo bučo, ki ti ob stiku z njimi dajo točke. Noč čarovnic “in a nutshell”
+  **“It’s not a bug, it’s a feature”**: Dejstvo, da igralec ne vidi, kaj se dogaja na zaslonu večino
+  časa, torej črn zaslon; muhe, ki jih netopir lovi, ki niso le “bug”, temveč tudi “feature” in
+  navsezadnje tudi beleženje točk, ki se igralcu dodajajo vedno ko igra igro. Ob ponovnem igranju
+  se točke ne resetirajo, se samo seštevajo in seštevajo ... Ampak to je totalno feature! Ker je bil
+  namen, da lahko s prijatelji tekmuješ, kdo bo imel do konca meseca več točk!
+
+
+## **Ključne mehanike**:
+
+- Netopirjev biosonar
+- Spanje na drevesu
+- Napad čarovnic
+- Hranjenje z muhami
+- Pobiranje buč
+
+## Tehnologije in orodja:
+**LibGDX (IntelliJ IDEA, Android Studio)**
+
+## Največja unikatnost igre: 
+**Dejstvo, da igralec večino časa ne vidi, kaj se dogaja na zaslonu, niti Health in Progress Bar-a!**
+
+##  Največja tehnična zahtevnost: 
+**Implementacija biosonarja in dejstvo, da sva delala v LibGDX.**
+
+## Ocenjeni delež uporabe AI: 
+15 % pri osnovnih funkcionalnostih, ki jih poznava in sva spoznala na faksu, 50% pa je bilo pomoči pri zahtevnejših funkcionalnostih (npr. biosonar). Za to pa sva si kvečjemu pomagala le z ChatGPT zastonjsko verzijo.
+
+- AI generiranega besedila, grafik in zvoka ni. Vizualni elementi so bili prevzeti iz itch.io, zvoki pa
+  iz Pixabay.
+
+## Status izdelka:
+- Implementirane so vse funkcionalnosti, ki sva jih planirala narediti v tem kratkem času.
+- Nedokončanih stvari ni, je pa marsikaj, kar bi si želela nadgraditi, popraviti, dodati!
+
 # RAZŠIRJENI DEL
 ## Razvojni proces
 

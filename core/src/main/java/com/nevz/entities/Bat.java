@@ -82,7 +82,7 @@ public class Bat extends Entity {
 
             if (!fallSoundPlayed) {
                 if (fallSound != null) {
-                    fallSound.play(0.8f);
+                    fallSound.play(0.4f);
                 }
 
                 fallSoundPlayed = true;
@@ -105,6 +105,9 @@ public class Bat extends Entity {
         } else {
             followTarget();
             sleepSoundPlayed = false;
+            if (sleepSound != null) {
+                sleepSound.stop();
+            }
         }
 
 

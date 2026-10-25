@@ -105,6 +105,8 @@ public class GameScreen extends ScreenAdapter {
     private Array<StatusBar> statusBars = new Array<>();
     private TextureAtlas atlas;
 
+    private int score = 0;
+
     public GameScreen(BuggyGame game) {
         this.game = game;
     }
@@ -117,7 +119,6 @@ public class GameScreen extends ScreenAdapter {
         viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         stage = new Stage(viewport, game.getBatch());
 
-
         healthBar = new StatusBar(
             10, 450,
             120, 15, Color.RED
@@ -127,7 +128,6 @@ public class GameScreen extends ScreenAdapter {
             10, 435,
             120, 10, Color.YELLOW
         );
-
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -878,6 +878,8 @@ public class GameScreen extends ScreenAdapter {
             }
 
             game.playPumpkinCollectSound();
+
+            score++;
 
             pumpkin.remove();
             pumpkins.removeIndex(i);

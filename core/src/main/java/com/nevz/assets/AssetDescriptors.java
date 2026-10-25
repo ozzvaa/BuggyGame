@@ -29,6 +29,9 @@ public class AssetDescriptors {
     public static final AssetDescriptor<Sound> GAME_OVER_SOUND =
         new AssetDescriptor<>("audio/game_over.mp3", Sound.class);
 
+    public static final AssetDescriptor<Sound> SLEEP_SOUND =
+        new AssetDescriptor<>("audio/purr.mp3", Sound.class);
+
     private AssetDescriptors() {
     }
 }

@@ -14,6 +14,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -113,9 +114,14 @@ public class MainMenuScreen extends ScreenAdapter {
 
         sonarEffect = new SonarEffect();
 
+        Sound fallSound =
+            game.getAssetManager().get(AssetDescriptors.GAME_OVER_SOUND);
+        Sound sleepSound =
+            game.getAssetManager().get(AssetDescriptors.SLEEP_SOUND);
+
         bat = new Bat(
             batAnimation,
-            atlas.findRegion(RegionNames.BAT_PERCH)
+            atlas.findRegion(RegionNames.BAT_PERCH), fallSound, sleepSound
         );
 
         bat.setScale(2.0f);

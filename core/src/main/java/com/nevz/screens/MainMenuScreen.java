@@ -27,6 +27,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.nevz.BuggyGame;
@@ -38,39 +40,28 @@ import com.nevz.effects.SonarEffect;
 import com.nevz.entities.Bat;
 import com.nevz.entities.Fireball;
 
-import com.badlogic.gdx.utils.Array;
-
 public class MainMenuScreen extends ScreenAdapter {
 
     private final BuggyGame game;
-
+    private final Array<Fireball> fireballs = new Array<>();
+    private final Vector2 locateOrigin = new Vector2();
+    private final Vector2 locateDirection = new Vector2(1f, 0f);
+    private final Vector2 candidateOffset = new Vector2();
+    private final Rectangle startButtonBounds = new Rectangle();
     private OrthographicCamera camera;
     private FitViewport viewport;
     private Stage stage;
-
     private Bat bat;
     private StartButtonActor startButton;
-
     private TextureRegion fireballRegion;
     private SonarEffect sonarEffect;
-
-    private final Array<Fireball> fireballs = new Array<>();
-
     // Sonar
     private boolean locateActive = false;
     private float locateElapsed = 0f;
     private float locateCooldownTimer = 0f;
     private float locateCurrentRange = 0f;
-
-    private final Vector2 locateOrigin = new Vector2();
-    private final Vector2 locateDirection = new Vector2(1f, 0f);
-    private final Vector2 candidateOffset = new Vector2();
-
     // Attack
     private float attackCooldownTimer = 0f;
-
-    private final Rectangle startButtonBounds = new Rectangle();
-
     private boolean startGameRequested = false;
 
     public MainMenuScreen(BuggyGame game) {
@@ -170,7 +161,7 @@ public class MainMenuScreen extends ScreenAdapter {
         updateAttackCooldown(delta);
         updateLocate(delta);
         handleFireballCollisions();
-        bat.resetStamina();
+        bat.setMainMenuStamina();
 
         stage.draw();
 
@@ -181,8 +172,19 @@ public class MainMenuScreen extends ScreenAdapter {
         sonarEffect.draw(camera.combined);
 
         if (startGameRequested) {
-            game.setScreen(new GameScreen(game));
-            dispose();
+            bat.toFront();
+            bat.addAction(Actions.sequence(
+                Actions.scaleTo(1, 1, 2f),
+                Actions.run(() -> {
+                    game.setScreen(new GameScreen(game));
+                    dispose();
+                })
+            ));
+
+            bat.setTarget(new Vector2(
+                GameConfig.WORLD_WIDTH / 2f,
+                GameConfig.WORLD_HEIGHT / 2f
+            ));
         }
     }
 
@@ -352,9 +354,9 @@ public class MainMenuScreen extends ScreenAdapter {
                 continue;
             }
 
-            if (!startButton.isRevealed()) {
-                continue;
-            }
+//            if (!startButton.isRevealed()) {
+//                continue;
+//            }
 
             if (fireball.getRect().overlaps(startButtonBounds)) {
                 fireball.remove();

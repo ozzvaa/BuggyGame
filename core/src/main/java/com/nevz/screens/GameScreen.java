@@ -2,7 +2,6 @@ package com.nevz.screens;
 
 import static com.nevz.config.GameConfig.BUG_SIZE;
 import static com.nevz.config.GameConfig.BUG_SPAWN_TIMER;
-import static com.nevz.config.GameConfig.BUG_SPEED;
 import static com.nevz.config.GameConfig.CHUNK_SIZE;
 import static com.nevz.config.GameConfig.LOCATE_COOLDOWN;
 import static com.nevz.config.GameConfig.LOCATE_DURATION;
@@ -34,6 +33,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Json;

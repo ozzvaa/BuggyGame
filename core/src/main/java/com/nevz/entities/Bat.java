@@ -186,9 +186,9 @@ public class Bat extends Entity {
         }
 
         if (direction.x < 0) {
-            setScaleX(-1f);  // vodoravno zrcaljenje
+            setScaleX(-Math.abs(getScaleX()));  // vodoravno zrcaljenje
         } else if (direction.x > 0) {
-            setScaleX(1f);
+            setScaleX(Math.abs(getScaleX()));
         }
 
         velocity.set(direction.cpy().scl(MAX_SPEED));
@@ -204,9 +204,9 @@ public class Bat extends Entity {
         }
 
         if (direction.x < 0) {
-            setScaleX(-1f);  // vodoravno zrcaljenje
+            setScaleX(-Math.abs(getScaleX()));  // vodoravno zrcaljenje
         } else if (direction.x > 0) {
-            setScaleX(1f);
+            setScaleX(Math.abs(getScaleX()));
         }
 
         velocity.set(direction.cpy().scl(MAX_SPEED));
@@ -241,8 +241,8 @@ public class Bat extends Entity {
         perchingTo = false;
     }
 
-    public void resetStamina() {
-        stamina = GameConfig.MAX_STAMINA;
+    public void setMainMenuStamina() {
+        stamina = GameConfig.MAX_STAMINA * 0.25f;
     }
 
     public void hurt() {

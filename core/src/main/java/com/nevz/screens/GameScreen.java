@@ -175,13 +175,14 @@ public class GameScreen extends ScreenAdapter {
         stage.act(delta);
         stage.draw();
 //        drawDebug();
-        handleStatus();
+
 
         if (sonarEffect.isActive()) {
             sonarEffect.setOrigin(bat.getCenter());
         }
 
         sonarEffect.draw(camera.combined);
+        handleStatus();
     }
 
 
@@ -544,32 +545,24 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void revealStatusBarReachedByPulse() {
-        float rangeSquared =
-            locateCurrentRange * locateCurrentRange;
-
-        float minDot =
-            MathUtils.cosDeg(LOCATE_HALF_ANGLE);
-
+        float earlyTriggerBonus = 1.3f; // val prej pride do njega
+        float rangeSquared = (locateCurrentRange * earlyTriggerBonus) * (locateCurrentRange * earlyTriggerBonus);
+        float minDot = MathUtils.cosDeg(LOCATE_HALF_ANGLE);
 
         for (StatusBar bar : statusBars) {
-
-            Vector2 barStageCenter = bar.getStageCenter();
-            System.out.println(barStageCenter);
+            Vector2 barCenter = bar.getStageCenter();
 
             candidateOffset.set(
-                barStageCenter.x - locateOrigin.x,
-                barStageCenter.y - locateOrigin.y
+                barCenter.x - locateOrigin.x,
+                barCenter.y - locateOrigin.y
             );
-
 
             float distanceSquared = candidateOffset.len2();
 
-            // Sonar drevesa še ni dosegel
             if (distanceSquared > rangeSquared) {
                 continue;
             }
 
-            // Ali je drevo v kotu
             if (distanceSquared > 0.0001f) {
                 candidateOffset.nor();
 
